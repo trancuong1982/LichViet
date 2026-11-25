@@ -209,5 +209,26 @@ public final class Weather {
         } catch (Exception e) { return ""; }
     }
 
+    /** Bản rất ngắn cho widget 2×2. */
+    public static String rainHintShort(JSONObject w) {
+        try {
+            JSONObject h = w.getJSONObject("hourly"), cur = w.getJSONObject("current");
+            JSONArray t = h.getJSONArray("time");
+            int i0 = currentHourIndex(w), end = Math.min(i0 + 12, t.length());
+            if (cur.optInt("weather_code", 0) >= 51 || cur.optDouble("precipitation", 0) >= 0.1) {
+                for (int i = i0 + 1; i < end; i++) if (!rainy(h, i)) return "Đang mưa · tạnh ~" + hourOf(t.getString(i)) + "h";
+                return "Đang mưa";
+            }
+            for (int i = i0; i < end; i++) {
+                if (rainy(h, i)) {
+                    double prob = h.getJSONArray("precipitation_probability").optDouble(i, Double.NaN);
+                    String kind = h.getJSONArray("weather_code").optInt(i, 0) >= 95 ? "Dông" : "Mưa";
+                    return kind + " ~" + hourOf(t.getString(i)) + "h" + (Double.isNaN(prob) ? "" : " · " + Math.round(prob) + "%");
+                }
+            }
+            return "Không mưa 12h tới";
+        } catch (Exception e) { return ""; }
+    }
+
     static int hourOf(String isoTime) { return Integer.parseInt(isoTime.substring(11, 13)); }
 }

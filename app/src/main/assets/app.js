@@ -292,7 +292,8 @@
   /* ---------- Cài đặt ---------- */
   var WTYPES = [
     { id: "clock", name: "Đồng hồ & Lịch", size: "4×2" }, { id: "date", name: "Ngày · Tuần · Âm lịch", size: "4×2" },
-    { id: "weather", name: "Thời tiết theo giờ", size: "4×3" }, { id: "calendar", name: "Lịch ngày", size: "2×2" },
+    { id: "weather", name: "Thời tiết theo giờ", size: "4×3" }, { id: "weather2", name: "Thời tiết", size: "2×2" },
+    { id: "calendar3", name: "Lịch ngày đầy đủ", size: "3×2" }, { id: "calendar", name: "Lịch ngày", size: "2×2" },
     { id: "compact", name: "Thanh gọn", size: "4×1" }
   ];
   function renderBirthInfo() {

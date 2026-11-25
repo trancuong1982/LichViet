@@ -180,4 +180,36 @@ public final class Lunar {
         c.set(yy, mm - 1, dd);
         return c.get(java.util.Calendar.WEEK_OF_YEAR);
     }
+
+    /* ---------------- Ngày lễ & tiết khí ---------------- */
+    static final String[] TIETKHI = {"Xuân phân", "Thanh minh", "Cốc vũ", "Lập hạ", "Tiểu mãn", "Mang chủng",
+            "Hạ chí", "Tiểu thử", "Đại thử", "Lập thu", "Xử thử", "Bạch lộ", "Thu phân", "Hàn lộ", "Sương giáng",
+            "Lập đông", "Tiểu tuyết", "Đại tuyết", "Đông chí", "Tiểu hàn", "Đại hàn", "Lập xuân", "Vũ thủy", "Kinh trập"};
+    public static String tietKhi(int jd) { return TIETKHI[INT(sunLongitudeRad(jd + 1) / Math.PI * 12)]; }
+
+    static final java.util.Map<String, String> LE_DUONG = new java.util.HashMap<>();
+    static final java.util.Map<String, String> LE_AM = new java.util.HashMap<>();
+    static {
+        String[] dg = {"1/1", "Tết Dương lịch", "3/2", "Thành lập Đảng", "14/2", "Lễ Tình nhân", "27/2", "Thầy thuốc VN",
+                "8/3", "Quốc tế Phụ nữ", "26/3", "Thành lập Đoàn", "30/4", "Giải phóng miền Nam", "1/5", "Quốc tế Lao động",
+                "19/5", "Sinh nhật Bác Hồ", "1/6", "Quốc tế Thiếu nhi", "28/6", "Gia đình VN", "27/7", "Thương binh Liệt sĩ",
+                "19/8", "Cách mạng tháng Tám", "2/9", "Quốc khánh", "13/10", "Doanh nhân VN", "20/10", "Phụ nữ VN",
+                "20/11", "Nhà giáo VN", "22/12", "Thành lập QĐND", "24/12", "Giáng sinh"};
+        String[] am = {"1/1", "Tết Nguyên đán", "2/1", "Tết Nguyên đán", "3/1", "Tết Nguyên đán", "15/1", "Tết Nguyên tiêu",
+                "3/3", "Tết Hàn thực", "10/3", "Giỗ Tổ Hùng Vương", "15/4", "Lễ Phật đản", "5/5", "Tết Đoan ngọ",
+                "7/7", "Thất tịch", "15/7", "Lễ Vu Lan", "15/8", "Tết Trung thu", "9/9", "Tết Trùng cửu",
+                "15/10", "Tết Hạ nguyên", "23/12", "Ông Táo chầu trời"};
+        for (int i = 0; i < dg.length; i += 2) LE_DUONG.put(dg[i], dg[i + 1]);
+        for (int i = 0; i < am.length; i += 2) LE_AM.put(am[i], am[i + 1]);
+    }
+
+    /** Ngày lễ / mùng 1 / rằm của ngày (null nếu không có). */
+    public static String suKien(int dd, int mm, Date L) {
+        String s = LE_DUONG.get(dd + "/" + mm);
+        if (s != null) return s;
+        if (!L.leap) { s = LE_AM.get(L.day + "/" + L.month); if (s != null) return s; }
+        if (L.day == 1) return "Mùng 1 tháng " + THANG[L.month];
+        if (L.day == 15) return "Rằm tháng " + THANG[L.month];
+        return null;
+    }
 }

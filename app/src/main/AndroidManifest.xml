@@ -56,6 +56,19 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_calendar" />
         </receiver>
 
+        <receiver android:name=".WeatherSmallWidget" android:exported="true" android:label="@string/wname_weather2">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_weather2" />
+        </receiver>
+        <receiver android:name=".CalendarWideWidget" android:exported="true" android:label="@string/wname_calendar3">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_calendar3" />
+        </receiver>
+
         <receiver android:name=".UpdateReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />

@@ -10,4 +10,8 @@
     <string name="wdesc_calendar">Lịch ngày dương – âm, số tuần</string>
     <string name="wname_compact">Thanh gọn</string>
     <string name="wdesc_compact">Thanh gọn một dòng</string>
+    <string name="wname_weather2">Thời tiết 2×2</string>
+    <string name="wdesc_weather2">Thời tiết hiện tại, cao/thấp, dự báo mưa</string>
+    <string name="wname_calendar3">Lịch ngày 3×2</string>
+    <string name="wdesc_calendar3">Ngày dương – âm, tuần, Can Chi, ngày lễ, tốt xấu theo tuổi</string>
 </resources>
