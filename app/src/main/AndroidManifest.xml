@@ -28,6 +28,13 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_clock" />
         </receiver>
 
+        <receiver android:name=".DateWidget" android:exported="true" android:label="@string/wname_date">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_date" />
+        </receiver>
+
         <receiver android:name=".CompactWidget" android:exported="true" android:label="@string/wname_compact">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

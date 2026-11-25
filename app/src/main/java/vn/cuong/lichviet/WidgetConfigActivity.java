@@ -19,6 +19,7 @@ public class WidgetConfigActivity extends Activity {
     private String type = "clock";
 
     @Override
+    @SuppressWarnings("deprecation")
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         Intent in = getIntent();
@@ -30,10 +31,14 @@ public class WidgetConfigActivity extends Activity {
         if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return; }
         type = WidgetRenderer.typeOfId(this, widgetId);
 
-        getWindow().setStatusBarColor(Color.parseColor("#0f1b2d"));
-        getWindow().setNavigationBarColor(Color.parseColor("#0b1524"));
+        boolean dark = WidgetRenderer.isNight(this);
+        int bg = dark ? Color.parseColor("#11141B") : Color.parseColor("#F6F8FD");
+        getWindow().setStatusBarColor(bg);
+        getWindow().setNavigationBarColor(bg);
+        if (!dark) getWindow().getDecorView().setSystemUiVisibility(
+                android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         WebView web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#0f1b2d"));
+        web.setBackgroundColor(bg);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -45,6 +50,10 @@ public class WidgetConfigActivity extends Activity {
 
     private class Bridge {
         @JavascriptInterface public String getType() { return type; }
+
+        @JavascriptInterface public boolean isDark() { return WidgetRenderer.isNight(WidgetConfigActivity.this); }
+
+        @JavascriptInterface public String getBirth() { return Weather.birth(WidgetConfigActivity.this); }
 
         @JavascriptInterface public String getConfig() { return WidgetRenderer.cfgJson(WidgetConfigActivity.this, widgetId); }
 

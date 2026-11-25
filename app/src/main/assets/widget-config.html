@@ -4,78 +4,67 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tùy chỉnh widget</title>
+<link rel="stylesheet" href="style.css">
 <style>
-:root{--bg:#0f1b2d;--card:#18263d;--card2:#1f3150;--tx:#eef3fb;--mut:#9fb0c8;--acc:#ffb547}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,Roboto,sans-serif}
-header{padding:16px 16px 6px;font-size:19px;font-weight:700}
-header small{display:block;font-size:13px;color:var(--mut);font-weight:400;margin-top:2px}
-.stage{margin:10px 12px;border-radius:20px;padding:22px 14px;min-height:170px;display:flex;align-items:center;justify-content:center;transition:background .3s}
-.stage.dark{background:linear-gradient(160deg,#1d3557 0%,#264653 45%,#2a9d8f 100%)}
-.stage.light{background:linear-gradient(160deg,#fefae0 0%,#e9edc9 40%,#ccd5ae 100%)}
-.stage.photo{background:radial-gradient(circle at 20% 20%,#ffb703 0,#fb8500 25%,transparent 45%),linear-gradient(170deg,#023047,#219ebc 60%,#8ecae6)}
-.wg{position:relative;border-radius:22px;padding:14px 16px;width:100%;max-width:380px;overflow:hidden}
-.wg .bgl{position:absolute;inset:0;border-radius:22px}
-.wg .c{position:relative}
-.row{display:flex;align-items:center}
-.f1{flex:1;min-width:0}
-.clk{font-size:54px;line-height:1;letter-spacing:-1px}
-.clk.thin{font-weight:300}.clk.bold{font-weight:500}
-.s14{font-size:14px}.s13{font-size:13px}.s12{font-size:12px}.s11{font-size:11px}.s10{font-size:10px}
-.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wi{width:38px;height:38px;display:inline-block}.wi svg{width:100%;height:100%}
-.end{text-align:right}
-.rain{display:flex;align-items:center;gap:5px;margin-top:6px}
-.rain i{width:13px;height:13px;display:inline-block}.rain i svg{width:100%;height:100%}
-.hours{display:flex;margin:8px 0 2px}.hours>div{flex:1;text-align:center}
-.hours .wi{width:24px;height:24px;margin:2px 0}
-.cal{text-align:center;width:160px;max-width:160px}
-.div{height:1px;width:56px;margin:7px auto 6px;opacity:.6}
-section{background:var(--card);margin:10px 12px;border-radius:16px;padding:6px 14px}
-.it{padding:12px 0;border-bottom:1px solid #ffffff12}.it:last-child{border-bottom:0}
-.lab{font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;color:var(--mut)}
-.lab b{color:var(--tx);font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:var(--card2);border:1px solid transparent;color:var(--tx);border-radius:20px;padding:7px 13px;font-size:13px}
-.chip.on{border-color:var(--acc);color:var(--acc)}
-.sw{width:22px;height:22px;border-radius:50%;display:inline-block;vertical-align:-6px;margin-right:6px;border:1px solid #ffffff40}
-input[type=range]{width:100%;accent-color:var(--acc)}
-.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px}
-.tg input{width:46px;height:26px;appearance:none;background:#3a4b66;border-radius:13px;position:relative;transition:.2s}
-.tg input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
-.tg input:checked{background:var(--acc)}.tg input:checked::after{left:23px}
-.bar{position:sticky;bottom:0;display:flex;gap:10px;padding:12px;background:linear-gradient(transparent,var(--bg) 30%)}
-.bar button{flex:1;border:0;border-radius:14px;padding:14px;font-size:15px;font-weight:600}
-.save{background:var(--acc);color:#1b1300}.cancel{background:var(--card2);color:var(--tx)}
+main{padding-bottom:110px}
+.stage{border-radius:26px;padding:22px 14px;min-height:170px;display:flex;align-items:center;justify-content:center;transition:background .3s}
+.stage.w1{background:linear-gradient(165deg,#C8D3EE,#E9DCEB 55%,#F6E3D3)}
+.stage.w2{background:linear-gradient(165deg,#0F1626,#1E2B47 60%,#3B2F4A)}
+.stage.w3{background:radial-gradient(circle at 80% 10%,#FFB36B 0,transparent 35%),linear-gradient(170deg,#1F3B73,#2F6E9E 50%,#5FA8B8)}
+.wg{position:relative;width:100%;max-width:360px;border-radius:24px;overflow:hidden}
+.wg .bgl{position:absolute;inset:0}.wg .c{position:relative;padding:14px 16px}
+.wg.wall .c{text-shadow:0 1px 3px rgba(0,0,0,.35)}
+.row{display:flex;align-items:center}.f1{flex:1;min-width:0}.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi{display:inline-block}.wi svg{width:100%;height:100%;display:block}
+.ck{line-height:1;letter-spacing:-1px}
+.cp{display:inline-block;border-radius:10px;padding:3px 8px;font-size:11px;font-weight:700}
+.rf{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:6px}
+.sw{width:34px;height:34px;border-radius:50%;border:0;flex:none}
+.sw.on{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--tile)}
+input[type=range]{width:100%;accent-color:var(--tile)}
+.tg{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:9px 0;border-bottom:1px solid var(--line)}
+.tg:last-child{border-bottom:0}
+.tg input{width:46px;height:28px;appearance:none;-webkit-appearance:none;background:var(--line);border-radius:14px;position:relative;transition:.2s;flex:none;margin:0}
+.tg input::after{content:"";position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.tg input:checked{background:var(--tile)}.tg input:checked::after{left:22px}
+.lab{display:flex;justify-content:space-between;font-size:13px;color:var(--tx2);margin:10px 0 6px}.lab b{color:var(--tx)}
+.bar2{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%)}
+.bar2 button{flex:1;border:0;border-radius:24px;padding:15px;font-size:15px;font-weight:600}
+.save{background:var(--tile);color:#fff}.cancel{background:var(--surf2);color:var(--tx)}
 .hide{display:none!important}
 </style>
 </head>
 <body>
-<header id="title">Tùy chỉnh widget<small>Xem trước trên hình nền</small></header>
+<main style="display:flex;flex-direction:column;gap:12px">
+  <div class="sh"><button id="btnBack" aria-label="Quay lại">‹</button><b id="title">Tùy chỉnh widget</b></div>
+  <div class="chips" id="walls"></div>
+  <div class="stage w3" id="stage"><div class="wg" id="wg"><div class="bgl" id="bgl"></div><div class="c" id="content"></div></div></div>
 
-<div class="chips" style="padding:0 12px" id="wallChips"></div>
-<div class="stage dark" id="stage"><div class="wg" id="wg"><div class="bgl" id="bgl"></div><div class="c" id="content"></div></div></div>
-
-<section>
-  <div class="it"><div class="lab">Màu nền</div><div class="chips" id="theme"></div></div>
-  <div class="it"><div class="lab">Độ đậm nền <b id="opv"></b></div>
-    <input type="range" min="0" max="100" step="5" id="opacity">
-    <div class="chips" style="margin-top:8px" id="opPresets"></div></div>
-  <div class="it"><div class="lab">Màu chữ</div><div class="chips" id="text"></div></div>
-</section>
-<section id="secClock">
-  <div class="it"><div class="lab">Định dạng giờ</div><div class="chips" id="h24"></div></div>
-  <div class="it"><div class="lab">Kiểu số đồng hồ</div><div class="chips" id="bold"></div></div>
-  <div class="it"><div class="lab">Hiển thị ngày</div><div class="chips" id="date"></div></div>
-</section>
-<section>
-  <div class="it tg" id="tLunar">Hiện âm lịch <input type="checkbox" id="lunar"></div>
-  <div class="it tg" id="tWeather">Hiện thời tiết <input type="checkbox" id="weather"></div>
-  <div class="it tg" id="tRain">Dự báo mưa / nắng sắp tới <input type="checkbox" id="rain"></div>
-  <div class="it tg" id="tPlace">Hiện tên địa điểm <input type="checkbox" id="place"></div>
-</section>
-<div style="height:70px"></div>
-<div class="bar"><button class="cancel" id="btnCancel">Hủy</button><button class="save" id="btnSave">Lưu widget</button></div>
+  <div class="card">
+    <div class="sec">NỀN</div>
+    <div class="chips" id="bgmode"></div>
+    <div class="lab">Độ đậm nền <b id="opv"></b></div>
+    <input type="range" min="0" max="100" step="5" id="opacity" aria-label="Độ đậm nền">
+    <div class="lab">Giao diện</div><div class="chips" id="theme"></div>
+    <div class="lab">Màu chủ đạo</div><div class="chips" id="accent"></div>
+    <div class="lab">Màu chữ</div><div class="chips" id="text"></div>
+  </div>
+  <div class="card" id="secClock">
+    <div class="sec">NGÀY GIỜ</div>
+    <div class="chips" id="h24"></div>
+    <div class="chips" id="bold" style="margin-top:8px"></div>
+    <div class="chips" id="date" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
+    <div class="tg" id="tLunar">Âm lịch <input type="checkbox" id="lunar" aria-label="Âm lịch"></div>
+    <div class="tg" id="tWeek">Số tuần trong năm <input type="checkbox" id="week" aria-label="Số tuần"></div>
+    <div class="tg" id="tWeather">Thời tiết &amp; dự báo mưa <input type="checkbox" id="weather" aria-label="Thời tiết"></div>
+    <div class="tg" id="tPlace">Tên địa điểm <input type="checkbox" id="place" aria-label="Địa điểm"></div>
+    <div class="tg" id="tTuoi">Tốt xấu theo tuổi <input type="checkbox" id="tuoi" aria-label="Theo tuổi"></div>
+  </div>
+  <div class="note">Nút ⟳ trên widget để cập nhật thời tiết ngay. Chu kỳ tự cập nhật chỉnh trong Cài đặt của app.</div>
+</main>
+<div class="bar2"><button class="cancel" id="btnCancel">Hủy</button><button class="save" id="btnSave">Lưu widget</button></div>
 
 <script src="icons.js"></script>
 <script src="wx.js"></script>
@@ -85,122 +74,132 @@ input[type=range]{width:100%;accent-color:var(--acc)}
   var $ = function (i) { return document.getElementById(i); };
   var B = window.CfgBridge || { getType: function () { return new URLSearchParams(location.search).get("type") || "clock"; },
     getConfig: function () { return window.__mockCfg || "{}"; }, getWeather: function () { return window.__mockWeather || ""; },
+    isDark: function () { return !!window.__mockDark; }, getBirth: function () { return "1985-05-12"; },
     save: function (j) { console.log("save", j); }, cancel: function () {} };
+  var DARK = false; try { DARK = B.isDark(); } catch (e) {}
+  document.body.classList.toggle("dark", DARK);
   var TYPE = B.getType();
-  var NAMES = { clock: "Đồng hồ & Lịch", compact: "Thanh gọn", weather: "Thời tiết", calendar: "Lịch ngày" };
-  var THU = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-  var THU_N = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-  var THANG = ["", "Giêng", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Tám", "Chín", "Mười", "Mười một", "Chạp"];
+  var NAMES = { clock: "Đồng hồ & Lịch", date: "Ngày · Tuần · Âm lịch", weather: "Thời tiết", calendar: "Lịch ngày", compact: "Thanh gọn" };
+  var THU = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], THU_N = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+  var THANG = ["", "Giêng", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Tám", "Chín", "Mười", "Một", "Chạp"];
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
-  var cfg = { opacity: 60, theme: "dark", text: "auto", date: "full", h24: true, bold: false, lunar: true, weather: true, rain: true, place: true };
-  try { var saved = JSON.parse(B.getConfig() || "{}"); for (var k in saved) cfg[k] = saved[k]; } catch (e) {}
+  var cfg = { opacity: 95, theme: "auto", accent: "blue", text: "auto", date: "full", h24: true, bold: true, lunar: true, weather: true, week: true, place: true, tuoi: true };
+  try { var sv = JSON.parse(B.getConfig() || "{}"); for (var k in sv) cfg[k] = sv[k]; } catch (e) {}
   var data = null; try { var r = B.getWeather(); if (r) data = JSON.parse(r); } catch (e) {}
+  var birth = ""; try { birth = B.getBirth(); } catch (e) {}
 
-  $("title").innerHTML = "Widget " + NAMES[TYPE] + "<small>Xem trước trên hình nền – chỉnh xong bấm Lưu</small>";
-  if (TYPE === "weather" || TYPE === "calendar") $("secClock").classList.add("hide");
-  if (TYPE === "weather") $("tLunar").classList.add("hide"), $("tWeather").classList.add("hide");
-  if (TYPE === "compact" || TYPE === "calendar") $("tRain").classList.add("hide"), $("tPlace").classList.add("hide");
+  $("title").textContent = "Widget " + NAMES[TYPE];
+  var hide = function (id) { $(id).classList.add("hide"); };
+  if (TYPE !== "clock" && TYPE !== "compact") hide("secClock");
+  if (TYPE === "compact") { hide("date"); }
+  if (TYPE === "weather") { hide("tLunar"); hide("tWeek"); }
+  if (TYPE === "date") { hide("tWeather"); hide("tPlace"); hide("tLunar"); }
+  if (TYPE === "calendar" || TYPE === "compact") hide("tPlace");
+  if (TYPE !== "date") hide("tTuoi");
 
-  var BG = { dark: "#0F1B2D", black: "#000000", blue: "#1E3A66", light: "#FFFFFF" };
-  function darkText() { return cfg.text === "dark" || (cfg.text === "auto" && cfg.theme === "light" && cfg.opacity >= 35); }
+  var ACC = { blue: ["#2D4BA0", "#B9C8FF"], green: ["#1F7A5C", "#7FD8B0"], orange: ["#C2620E", "#F4A65A"], purple: ["#6B4FBB", "#CDBDFF"], system: ["#3E5F90", "#A8C8FF"] };
+  function pal() {
+    var dark = cfg.theme === "dark" || (cfg.theme === "auto" && DARK);
+    var wall = cfg.text === "white" || (cfg.text === "auto" && cfg.opacity < 35);
+    var p = { surface: dark ? "#1C212B" : "#F6F8FD", wall: wall };
+    if (wall) { p.fg = "#fff"; p.fg2 = "rgba(255,255,255,.9)"; p.acc = "#fff"; p.red = "#FFC2B8"; p.rain = "#CFE6FF";
+      p.cA = "rgba(255,255,255,.25)"; p.oA = "#fff"; p.cB = "rgba(255,255,255,.25)"; p.oB = "#fff"; return p; }
+    var dt = cfg.text === "dark" || (cfg.text !== "white" && !dark);
+    p.fg = dt ? "#1B1F2A" : "#E7EAF2"; p.fg2 = dt ? "#5A6275" : "#A9B1C2"; p.acc = ACC[cfg.accent][dt ? 0 : 1];
+    p.red = dt ? "#C0392B" : "#FF8A7A"; p.rain = dt ? "#2D6FD8" : "#8DB8FF";
+    p.cA = dark ? "#4A3220" : "#FFE2C7"; p.oA = dark ? "#FFDCC0" : "#5C3410"; p.cB = dark ? "#26345F" : "#DDE5FF"; p.oB = dark ? "#D6E0FF" : "#1F3A80";
+    return p;
+  }
+
   function chips(id, opts, key, cb) {
-    $(id).innerHTML = opts.map(function (o) {
-      return '<button class="chip" data-v=\'' + JSON.stringify(o[0]) + '\'>' + o[1] + "</button>";
-    }).join("");
-    $(id).querySelectorAll(".chip").forEach(function (b) {
-      b.onclick = function () { cfg[key] = JSON.parse(b.getAttribute("data-v")); if (cb) cb(); sync(); };
-    });
+    $(id).innerHTML = opts.map(function (o) { return '<button class="chp" data-v=\'' + JSON.stringify(o[0]) + '\'>' + o[1] + "</button>"; }).join("");
+    $(id).querySelectorAll(".chp").forEach(function (b) { b.onclick = function () { cfg[key] = JSON.parse(b.getAttribute("data-v")); if (cb) cb(); sync(); }; });
   }
-  function mark() {
-    ["theme", "text", "h24", "bold", "date", "opPresets"].forEach(function (id) {
-      var key = id === "opPresets" ? "opacity" : id;
-      $(id).querySelectorAll(".chip").forEach(function (b) { b.classList.toggle("on", JSON.parse(b.getAttribute("data-v")) === cfg[key]); });
-    });
-    $("opacity").value = cfg.opacity;
-    $("opv").textContent = cfg.opacity === 0 ? "Trong suốt" : cfg.opacity + "%";
-    ["lunar", "weather", "rain", "place"].forEach(function (k) { $(k).checked = !!cfg[k]; });
-  }
-
-  chips("theme", [["dark", '<span class="sw" style="background:#0F1B2D"></span>Xanh đêm'], ["black", '<span class="sw" style="background:#000"></span>Đen'],
-    ["blue", '<span class="sw" style="background:#1E3A66"></span>Xanh dương'], ["light", '<span class="sw" style="background:#fff"></span>Trắng']], "theme");
-  chips("opPresets", [[0, "Trong suốt"], [25, "25%"], [50, "50%"], [75, "75%"], [100, "Đặc"]], "opacity");
-  chips("text", [["auto", "Tự động"], ["white", "Trắng"], ["dark", "Đen"]], "text");
-  chips("h24", [[true, "24 giờ (15:45)"], [false, "12 giờ (3:45)"]], "h24");
-  chips("bold", [[false, "Mảnh"], [true, "Đậm"]], "bold");
+  chips("bgmode", [[95, "Đặc"], [45, "Mờ"], [0, "Trong suốt"]], "opacity");
+  chips("theme", [["auto", "Theo máy"], ["light", "Sáng"], ["dark", "Tối"]], "theme");
+  chips("text", [["auto", "Tự động"], ["white", "Trắng"], ["dark", "Tối"]], "text");
+  chips("h24", [[true, "24 giờ"], [false, "12 giờ"]], "h24");
+  chips("bold", [[true, "Số đậm"], [false, "Số mảnh"]], "bold");
   var now = new Date(), d = now.getDate(), m = now.getMonth() + 1, y = now.getFullYear(), wd = now.getDay();
   chips("date", [["full", THU[wd] + ", " + pad(d) + "/" + pad(m) + "/" + y], ["long", THU[wd] + ", " + d + " tháng " + m], ["short", THU_N[wd] + " · " + pad(d) + "/" + pad(m)]], "date");
+  $("accent").innerHTML = [["blue", "#2D4BA0"], ["green", "#1F7A5C"], ["orange", "#C2620E"], ["purple", "#6B4FBB"], ["system", "conic-gradient(#F6B73C,#2D4BA0,#1F7A5C,#F6B73C)"]].map(function (a) {
+    return '<button class="sw" data-v="' + a[0] + '" style="background:' + a[1] + '" aria-label="' + (a[0] === "system" ? "Theo hình nền" : a[0]) + '"></button>';
+  }).join("");
+  $("accent").querySelectorAll(".sw").forEach(function (b) { b.onclick = function () { cfg.accent = b.getAttribute("data-v"); sync(); }; });
   $("opacity").oninput = function () { cfg.opacity = parseInt(this.value, 10); sync(); };
-  ["lunar", "weather", "rain", "place"].forEach(function (k) { $(k).onchange = function () { cfg[k] = this.checked; sync(); }; });
-
-  var walls = [["dark", "Hình nền tối"], ["light", "Hình nền sáng"], ["photo", "Hình nền ảnh"]];
-  $("wallChips").innerHTML = walls.map(function (w, i) { return '<button class="chip' + (i ? "" : " on") + '" data-w="' + w[0] + '">' + w[1] + "</button>"; }).join("");
-  $("wallChips").querySelectorAll(".chip").forEach(function (b) {
-    b.onclick = function () {
-      $("wallChips").querySelectorAll(".chip").forEach(function (x) { x.classList.remove("on"); });
-      b.classList.add("on"); $("stage").className = "stage " + b.getAttribute("data-w");
-    };
+  ["lunar", "weather", "week", "place", "tuoi"].forEach(function (k) { $(k).onchange = function () { cfg[k] = this.checked; sync(); }; });
+  var walls = [["w3", "Hình nền ảnh"], ["w1", "Nền sáng"], ["w2", "Nền tối"]];
+  $("walls").innerHTML = walls.map(function (w, i) { return '<button class="chp' + (i ? "" : " on") + '" data-w="' + w[0] + '">' + w[1] + "</button>"; }).join("");
+  $("walls").querySelectorAll(".chp").forEach(function (b) {
+    b.onclick = function () { $("walls").querySelectorAll(".chp").forEach(function (x) { x.classList.remove("on"); }); b.classList.add("on"); $("stage").className = "stage " + b.getAttribute("data-w"); };
   });
 
-  function dateText() {
-    if (cfg.date === "long") return THU[wd] + ", " + d + " tháng " + m;
-    if (cfg.date === "short") return THU_N[wd] + " · " + pad(d) + "/" + pad(m);
-    return THU[wd] + ", " + pad(d) + "/" + pad(m) + "/" + y;
+  function mark() {
+    ["theme", "text", "h24", "bold", "date", "bgmode"].forEach(function (id) {
+      var key = id === "bgmode" ? "opacity" : id;
+      $(id).querySelectorAll(".chp").forEach(function (b) { b.classList.toggle("on", JSON.parse(b.getAttribute("data-v")) === cfg[key]); });
+    });
+    $("accent").querySelectorAll(".sw").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-v") === cfg.accent); });
+    $("opacity").value = cfg.opacity; $("opv").textContent = cfg.opacity === 0 ? "Trong suốt" : cfg.opacity + "%";
+    ["lunar", "weather", "week", "place", "tuoi"].forEach(function (k) { $(k).checked = !!cfg[k]; });
   }
-  function shortPlace(p) { p = p || ""; var i = p.indexOf(","); return i > 0 ? p.slice(0, i) : p; }
 
   function render() {
-    var fg = darkText() ? "#1B2533" : "#FFFFFF", fg2 = darkText() ? "rgba(27,37,51,.7)" : "rgba(255,255,255,.8)";
-    var acc = darkText() ? "#C8741A" : "#FFB547";
-    $("bgl").style.background = BG[cfg.theme]; $("bgl").style.opacity = cfg.opacity / 100;
-    $("wg").style.color = fg;
-    var L = Lunar.solar2Lunar(d, m, y), w = data && data.w, cur = w && w.current;
+    var p = pal(), L = Lunar.solar2Lunar(d, m, y), wk = Lunar.isoWeek(d, m, y), w = data && data.w, cur = w && w.current;
+    $("bgl").style.background = p.surface; $("bgl").style.opacity = cfg.opacity / 100;
+    $("wg").className = "wg" + (p.wall ? " wall" : ""); $("wg").style.color = p.fg;
+    $("wg").style.maxWidth = TYPE === "calendar" ? "170px" : "360px";
     var hh = cfg.h24 ? pad(now.getHours()) : ((now.getHours() % 12) || 12);
-    var clock = '<div class="clk ' + (cfg.bold ? "bold" : "thin") + '">' + hh + ":" + pad(now.getMinutes()) + "</div>";
+    var ck = function (size) { return '<div class="ck" style="font-size:' + size + "px;font-weight:" + (cfg.bold ? 500 : 300) + ";color:" + p.acc + '">' + hh + ":" + pad(now.getMinutes()) + "</div>"; };
+    var cp = function (txt, kind) { return '<span class="cp" style="background:' + (kind ? p.cB : p.cA) + ";color:" + (kind ? p.oB : p.oA) + '">' + txt + "</span>"; };
     var dm = L.day + "/" + L.month + (L.leap ? "N" : "");
-    var wIcon = cur ? WX.icon(cur.weather_code, cur.is_day) : WX_ICONS.partly_day;
+    var wIc = function (s, code, day) { return '<span class="wi" style="width:' + s + "px;height:" + s + 'px">' + (cur ? WX.icon(code == null ? cur.weather_code : code, day == null ? cur.is_day : day) : WX_ICONS.partly_day) + "</span>"; };
     var temp = cur ? Math.round(cur.temperature_2m) + "°" : "--°";
-    var hint = w ? WX.rainHint(w) : "Có thể mưa khoảng 17h (60%)";
-    var rain = '<div class="rain s12" style="color:' + fg2 + '"><i>' + WX_ICONS.umbrella + "</i>" + hint + "</div>";
+    var place = data && data.place ? data.place.split(",")[0] : "Vị trí hiện tại";
+    var upd = pad(now.getHours()) + ":" + pad(now.getMinutes());
+    var rf = '<span class="rf" style="background:' + p.cB + ';color:' + p.acc + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></span>';
+    var hint = w ? WX.rainHint(w) : "Mở app để lấy vị trí";
+    var dateT = cfg.date === "long" ? THU[wd] + ", " + d + " tháng " + m : cfg.date === "short" ? THU_N[wd] + " · " + pad(d) + "/" + pad(m) : THU[wd] + ", " + pad(d) + "/" + pad(m) + "/" + y;
     var h = "";
-    $("wg").style.maxWidth = TYPE === "calendar" ? "170px" : "380px";
     if (TYPE === "clock") {
-      var desc = cur ? WX.desc(cur.weather_code) + " · " + Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "°" : "Có mây · 32°/24°";
-      h = '<div class="row"><div class="f1">' + clock + '<div class="s14 ell" style="margin-top:2px">' + dateText() + "</div>" +
-        (cfg.lunar ? '<div class="s13 ell" style="color:' + fg2 + '">Âm lịch ' + dm + " · " + Lunar.canChiYear(L.year) + (L.day === 1 ? " · Mùng 1" : L.day === 15 ? " · Rằm" : "") + "</div>" : "") + "</div>" +
-        (cfg.weather ? '<div class="end"><div class="row" style="justify-content:flex-end"><span class="wi">' + wIcon + '</span><span style="font-size:28px;font-weight:300;margin-left:4px">' + temp + "</span></div>" +
-          '<div class="s12" style="color:' + fg2 + '">' + desc + "</div>" + (cfg.place ? '<div class="s11" style="color:' + fg2 + '">' + (shortPlace(data && data.place) || "Vị trí của bạn") + "</div>" : "") + "</div>" : "") +
-        "</div>" + (cfg.rain ? rain : "");
-    } else if (TYPE === "compact") {
-      h = '<div class="row">' + clock.replace("clk ", 'clk" style="font-size:34px" data-x="') + '<div style="width:1px;height:30px;background:' + fg2 + ';margin:0 12px"></div>' +
-        '<div class="f1"><div class="s13 ell">' + dateText() + "</div>" + (cfg.lunar ? '<div class="s12 ell" style="color:' + fg2 + '">ÂL ' + dm + " · " + Lunar.canChiYear(L.year) + "</div>" : "") + "</div>" +
-        (cfg.weather ? '<span class="wi" style="width:30px;height:30px">' + wIcon + '</span><span style="font-size:20px;margin-left:4px">' + temp + "</span>" : "") + "</div>";
+      h = '<div class="row"><div class="f1">' + ck(52) + '<div class="ell" style="font-size:14px;font-weight:600;margin-top:6px">' + dateT + (cfg.week ? " · Tuần " + wk : "") + "</div>" +
+        (cfg.lunar ? '<div class="ell" style="font-size:12px;color:' + p.fg2 + ';margin-top:3px">Âm lịch ' + dm + " · " + Lunar.canChiYear(L.year) + "</div>" : "") + "</div>" +
+        (cfg.weather ? '<div style="text-align:right"><div class="row" style="justify-content:flex-end">' + wIc(36) + '<span style="font-size:28px;font-weight:600;margin-left:4px">' + temp + "</span></div>" +
+          '<div style="font-size:11px;color:' + p.fg2 + '">' + (cur ? WX.desc(cur.weather_code) + " · " + Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "°" : "") + "</div>" +
+          (cfg.place ? '<div style="font-size:11px;color:' + p.fg2 + '">' + place + "</div>" : "") + "</div>" : "") + "</div>" +
+        (cfg.weather ? '<div class="row" style="margin-top:8px"><div class="f1">' + cp(hint, 1) + '</div><span style="font-size:10px;color:' + p.fg2 + '">' + upd + "</span>" + rf + "</div>" : "");
+    } else if (TYPE === "date") {
+      var t = birth ? Lunar.tuoi.apply(null, birth.split("-").map(Number).reverse()) : null, g = Lunar.danhGia(d, m, y, t && cfg.tuoi ? t.chi : null);
+      var l3 = t && cfg.tuoi ? "Tuổi " + t.chiName + ": " + g.muc + " · giờ tốt " + g.gioTot.slice(0, 3).map(function (x) { return x.split(" ")[0]; }).join(", ")
+        : (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · giờ tốt " + Lunar.gioHoangDao(L.jd).slice(0, 3).map(function (x) { return x.split(" ")[0]; }).join(", ");
+      h = '<div class="row"><div style="width:96px;text-align:center;flex:none"><div style="font-size:13px;font-weight:600;color:' + (wd === 0 ? p.red : p.fg) + '">' + THU[wd] + '</div><div style="font-size:54px;font-weight:600;line-height:1.05;color:' + p.acc + '">' + d +
+        '</div><div style="font-size:11px;color:' + p.fg2 + '">Tháng ' + m + " · " + y + '</div></div><div class="f1" style="margin-left:12px">' + (cfg.week ? cp("Tuần " + wk, 1) + " " : "") + cp("ÂL " + dm, 0) +
+        '<div class="ell" style="font-size:12px;margin-top:8px">Ngày ' + Lunar.canChiDay(L.jd) + " · tháng " + Lunar.canChiMonth(L.month, L.year) + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:5px">Năm ' + Lunar.canChiYear(L.year) +
+        " · tháng " + THANG[L.month] + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:5px">' + l3 + "</div></div></div>";
     } else if (TYPE === "weather") {
       var hrs = "";
-      if (w) {
-        var i0 = WX.hourIndex(w);
-        for (var k = 0; k < 5; k++) {
-          var i = i0 + 1 + k * 2; if (i >= w.hourly.time.length) break;
-          hrs += '<div><div class="s11" style="color:' + fg2 + '">' + WX.hourOf(w.hourly.time[i]) + 'h</div><span class="wi">' + WX.icon(w.hourly.weather_code[i], w.hourly.is_day[i]) +
-            '</span><div class="s13">' + Math.round(w.hourly.temperature_2m[i]) + '°</div><div class="s10" style="color:' + (darkText() ? "#2F7FD9" : "#7CC0FF") + '">' + WX.popText(w.hourly, i) + "</div></div>";
-        }
-      } else hrs = '<div class="s12" style="color:' + fg2 + '">Mở app để lấy vị trí và dữ liệu thời tiết</div>';
-      h = '<div class="row s12" style="color:' + fg2 + ';margin-bottom:2px"><div class="f1 ell">' + (cfg.place ? (shortPlace(data && data.place) || "Vị trí hiện tại") : "") + '</div><span class="s10">Cập nhật ' + pad(now.getHours()) + ":" + pad(now.getMinutes()) + "</span></div>" +
-        '<div class="row"><span class="wi" style="width:44px;height:44px">' + wIcon + '</span><span style="font-size:34px;font-weight:300;margin-left:6px">' + temp + "</span>" +
-        '<div class="f1" style="margin-left:12px"><div class="s14 ell">' + (cur ? WX.desc(cur.weather_code) + " · cảm giác " + Math.round(cur.apparent_temperature) + "°" : "--") + "</div>" +
-        '<div class="s12 ell" style="color:' + fg2 + '">' + (w ? "Cao " + Math.round(w.daily.temperature_2m_max[0]) + "° · Thấp " + Math.round(w.daily.temperature_2m_min[0]) + "° · Ẩm " + cur.relative_humidity_2m + "%" : "") + "</div></div></div>" +
-        '<div class="hours">' + hrs + "</div>" + (cfg.rain ? rain : "");
+      if (w) { var i0 = WX.hourIndex(w); for (var k = 0; k < 5; k++) { var i = i0 + 1 + k * 2; if (i >= w.hourly.time.length) break;
+        hrs += '<div style="flex:1;text-align:center"><div style="font-size:11px;color:' + p.fg2 + '">' + WX.hourOf(w.hourly.time[i]) + "h</div>" + wIc(26, w.hourly.weather_code[i], w.hourly.is_day[i]) +
+          '<div style="font-size:13px;font-weight:600">' + Math.round(w.hourly.temperature_2m[i]) + '°</div><div style="font-size:10px;color:' + p.rain + '">' + WX.popText(w.hourly, i) + "</div></div>"; } }
+      h = '<div class="row"><div class="f1 ell" style="font-size:12px;font-weight:600">' + (cfg.place ? place : "") + '</div><span style="font-size:10px;color:' + p.fg2 + '">' + upd + "</span>" + rf + "</div>" +
+        '<div class="row" style="margin-top:4px">' + wIc(46) + '<span style="font-size:36px;font-weight:600;margin-left:6px">' + temp + '</span><div class="f1" style="margin-left:12px"><div class="ell" style="font-size:13px;font-weight:600">' +
+        (cur ? WX.desc(cur.weather_code) + " · cảm giác " + Math.round(cur.apparent_temperature) + "°" : "Chưa có dữ liệu") + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:4px">' +
+        (w ? "Cao " + Math.round(w.daily.temperature_2m_max[0]) + "° · Thấp " + Math.round(w.daily.temperature_2m_min[0]) + "° · Ẩm " + cur.relative_humidity_2m + "%" : "") + "</div></div></div>" +
+        '<div class="row" style="margin:10px 0 8px">' + hrs + "</div>" + (cfg.weather ? cp(hint, 1) : "");
+    } else if (TYPE === "calendar") {
+      h = '<div class="row"><div class="f1" style="font-size:12px;font-weight:600;color:' + (wd === 0 ? p.red : p.fg) + '">' + THU[wd] + "</div>" + (cfg.week ? cp("T" + wk, 1) : "") + "</div>" +
+        '<div style="font-size:50px;font-weight:600;line-height:1.1;color:' + p.acc + ';margin-top:4px">' + d + '</div><div style="font-size:11px;color:' + p.fg2 + '">Tháng ' + m + " · " + y + "</div>" +
+        '<div class="row" style="margin-top:8px">' + (cfg.lunar ? cp("ÂL " + dm, 0) : "") + '<span class="f1"></span>' + (cfg.weather ? wIc(18) + '<span style="font-size:12px;margin-left:3px">' + temp + "</span>" : "") + "</div>";
     } else {
-      h = '<div class="cal"><div class="s13" style="font-weight:500;color:' + (wd === 0 ? "#FF6B6B" : fg) + '">' + THU[wd] + '</div><div style="font-size:46px;font-weight:500;line-height:1.05">' + d +
-        '</div><div class="s12" style="color:' + fg2 + '">Tháng ' + m + ", " + y + "</div>" +
-        (cfg.lunar ? '<div class="div" style="background:' + fg2 + '"></div><div class="row" style="justify-content:center"><span style="font-size:24px;font-weight:500;color:' + acc + '">' + L.day +
-          '</span><div style="margin-left:7px;text-align:left"><div class="s11" style="color:' + fg2 + '">Tháng ' + THANG[L.month] + '</div><div class="s11" style="color:' + fg2 + '">Năm ' + Lunar.canChiYear(L.year) + "</div></div></div>" : "") +
-        (cfg.weather ? '<div class="row s12" style="justify-content:center;margin-top:4px"><span class="wi" style="width:18px;height:18px">' + wIcon + '</span><span style="margin-left:4px">' + temp + "</span></div>" : "") + "</div>";
+      h = '<div class="row">' + ck(32) + '<span style="width:1px;height:30px;background:' + p.fg2 + ';opacity:.5;margin:0 12px"></span><div class="f1"><div class="ell" style="font-size:13px;font-weight:600">' + THU_N[wd] + ", " + pad(d) + "/" + pad(m) +
+        (cfg.week ? " · T" + wk : "") + "</div>" + (cfg.lunar ? '<div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:3px">ÂL ' + dm + " · " + Lunar.canChiYear(L.year) + "</div>" : "") + "</div>" +
+        (cfg.weather ? wIc(28) + '<span style="font-size:20px;font-weight:600;margin-left:4px">' + temp + "</span>" : "") + "</div>";
     }
     $("content").innerHTML = h;
   }
   function sync() { mark(); render(); }
   $("btnSave").onclick = function () { B.save(JSON.stringify(cfg)); };
-  $("btnCancel").onclick = function () { B.cancel(); };
+  $("btnCancel").onclick = $("btnBack").onclick = function () { B.cancel(); };
   sync();
 })();
 </script>

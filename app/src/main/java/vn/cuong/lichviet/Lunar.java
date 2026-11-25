@@ -98,4 +98,86 @@ public final class Lunar {
     public static String canChiYear(int y) { return CAN[(y + 6) % 10] + " " + CHI[(y + 8) % 12]; }
     public static String canChiDay(int jd) { return CAN[(jd + 9) % 10] + " " + CHI[(jd + 1) % 12]; }
     public static String canChiMonth(int m, int y) { return CAN[(y * 12 + m + 3) % 10] + " " + CHI[(m + 1) % 12]; }
+
+    /* ---------------- Xem ngày theo tuổi ---------------- */
+    static final String[] NAP_AM = {"Hải Trung Kim", "Lư Trung Hỏa", "Đại Lâm Mộc", "Lộ Bàng Thổ", "Kiếm Phong Kim", "Sơn Đầu Hỏa",
+            "Giản Hạ Thủy", "Thành Đầu Thổ", "Bạch Lạp Kim", "Dương Liễu Mộc", "Tuyền Trung Thủy", "Ốc Thượng Thổ",
+            "Tích Lịch Hỏa", "Tùng Bách Mộc", "Trường Lưu Thủy", "Sa Trung Kim", "Sơn Hạ Hỏa", "Bình Địa Mộc",
+            "Bích Thượng Thổ", "Kim Bạch Kim", "Phú Đăng Hỏa", "Thiên Hà Thủy", "Đại Trạch Thổ", "Thoa Xuyến Kim",
+            "Tang Đố Mộc", "Đại Khê Thủy", "Sa Trung Thổ", "Thiên Thượng Hỏa", "Thạch Lựu Mộc", "Đại Hải Thủy"};
+    static final String[] THAN = {"Thanh Long", "Minh Đường", "Thiên Hình", "Chu Tước", "Kim Quỹ", "Kim Đường",
+            "Bạch Hổ", "Ngọc Đường", "Thiên Lao", "Huyền Vũ", "Tư Mệnh", "Câu Trần"};
+    static final boolean[] THAN_TOT = {true, true, false, false, true, true, false, true, false, false, true, false};
+    static final String[] TRUC = {"Kiến", "Trừ", "Mãn", "Bình", "Định", "Chấp", "Phá", "Nguy", "Thành", "Thâu", "Khai", "Bế"};
+    static final int[] TRUC_DIEM = {0, 1, 1, 0, 1, 1, -1, -1, 1, 0, 1, -1};
+    public static final String[] MUC = {"", "Xấu", "Kém", "Bình thường", "Khá", "Tốt"};
+    static final String[] GIO_HD = {"110100101100", "001101001011", "110011010010", "101100110100", "001011001101", "010010110011"};
+
+    private static int thanStart(int mchi) {
+        switch (mchi) {
+            case 2: case 8: return 0;
+            case 3: case 9: return 2;
+            case 4: case 10: return 4;
+            case 5: case 11: return 6;
+            case 6: case 0: return 8;
+            default: return 10; // Mùi, Sửu
+        }
+    }
+
+    static int tietMonthChi(int jd) {
+        double deg = sunLongitudeRad(jd + 0.5) * 180 / Math.PI;
+        return (2 + INT((((deg - 315) % 360) + 360) % 360 / 30)) % 12;
+    }
+
+    /** Chi của tuổi (theo năm âm lịch của ngày sinh dương lịch). */
+    public static int chiTuoi(int dd, int mm, int yy) { return (fromSolar(dd, mm, yy).year + 8) % 12; }
+    public static int namAmTuoi(int dd, int mm, int yy) { return fromSolar(dd, mm, yy).year; }
+    public static String menh(int lunarYear) { return NAP_AM[((((lunarYear - 4) % 60) + 60) % 60) / 2]; }
+
+    public static final class DanhGia {
+        public int diem; public String muc; public boolean hoangDao, xung; public String than, truc;
+    }
+
+    /** chiTuoi < 0: không xét tuổi. */
+    public static DanhGia danhGia(int dd, int mm, int yy, int chiTuoi) {
+        Date L = fromSolar(dd, mm, yy);
+        int jd = L.jd, dchi = (jd + 1) % 12, mchi = (L.month + 1) % 12;
+        int ti = (dchi - thanStart(mchi) + 12) % 12, tr = (dchi - tietMonthChi(jd) + 12) % 12;
+        DanhGia r = new DanhGia();
+        r.than = THAN[ti]; r.hoangDao = THAN_TOT[ti]; r.truc = TRUC[tr];
+        int s = 3 + (r.hoangDao ? 1 : -1) + TRUC_DIEM[tr];
+        if (chiTuoi >= 0) {
+            int diff = (dchi - chiTuoi + 12) % 12;
+            if (diff == 6) { s -= 2; r.xung = true; }
+            else if ((dchi + chiTuoi) % 12 == 1) s += 1;
+            else if (dchi % 4 == chiTuoi % 4 && dchi != chiTuoi) s += 1;
+        }
+        if (r.xung) s = Math.min(s, 2);
+        r.diem = Math.max(1, Math.min(5, s));
+        r.muc = MUC[r.diem];
+        return r;
+    }
+
+    /** Giờ hoàng đạo trong ngày, bỏ giờ xung tuổi (chiTuoi < 0: không lọc). */
+    public static String gioTot(int jd, int chiTuoi, int max) {
+        String s = GIO_HD[((jd + 1) % 12) % 6];
+        StringBuilder b = new StringBuilder();
+        int n = 0;
+        for (int i = 0; i < 12 && n < max; i++) {
+            if (s.charAt(i) != '1') continue;
+            if (chiTuoi >= 0 && (i - chiTuoi + 12) % 12 == 6) continue;
+            if (b.length() > 0) b.append(", ");
+            b.append(CHI[i]); n++;
+        }
+        return b.toString();
+    }
+
+    public static int isoWeek(int dd, int mm, int yy) {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        c.clear();
+        c.setFirstDayOfWeek(java.util.Calendar.MONDAY);
+        c.setMinimalDaysInFirstWeek(4);
+        c.set(yy, mm - 1, dd);
+        return c.get(java.util.Calendar.WEEK_OF_YEAR);
+    }
 }

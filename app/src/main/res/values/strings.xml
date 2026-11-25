@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Lịch Việt</string>
-    <string name="wdesc_clock">Đồng hồ, lịch âm và thời tiết</string>
-    <string name="wdesc_compact">Thanh gọn một dòng</string>
-    <string name="wdesc_weather">Thời tiết và dự báo theo giờ</string>
-    <string name="wdesc_calendar">Lịch ngày dương – âm</string>
     <string name="wname_clock">Đồng hồ &amp; Lịch</string>
-    <string name="wname_compact">Thanh gọn</string>
+    <string name="wdesc_clock">Đồng hồ, ngày âm lịch, thời tiết</string>
+    <string name="wname_date">Ngày · Tuần · Âm lịch</string>
+    <string name="wdesc_date">Ngày, số tuần, âm lịch, tốt xấu theo tuổi</string>
     <string name="wname_weather">Thời tiết</string>
+    <string name="wdesc_weather">Thời tiết và dự báo theo giờ</string>
     <string name="wname_calendar">Lịch ngày</string>
+    <string name="wdesc_calendar">Lịch ngày dương – âm, số tuần</string>
+    <string name="wname_compact">Thanh gọn</string>
+    <string name="wdesc_compact">Thanh gọn một dòng</string>
 </resources>

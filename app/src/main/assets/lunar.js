@@ -112,10 +112,75 @@
     return CAN[canIdx] + " " + CHI[chiIdx];
   }
 
+
+  /* ---------- Xem ngày theo tuổi (lịch vạn niên truyền thống) ---------- */
+  var NAP_AM = ["Hải Trung Kim", "Lư Trung Hỏa", "Đại Lâm Mộc", "Lộ Bàng Thổ", "Kiếm Phong Kim", "Sơn Đầu Hỏa",
+    "Giản Hạ Thủy", "Thành Đầu Thổ", "Bạch Lạp Kim", "Dương Liễu Mộc", "Tuyền Trung Thủy", "Ốc Thượng Thổ",
+    "Tích Lịch Hỏa", "Tùng Bách Mộc", "Trường Lưu Thủy", "Sa Trung Kim", "Sơn Hạ Hỏa", "Bình Địa Mộc",
+    "Bích Thượng Thổ", "Kim Bạch Kim", "Phú Đăng Hỏa", "Thiên Hà Thủy", "Đại Trạch Thổ", "Thoa Xuyến Kim",
+    "Tang Đố Mộc", "Đại Khê Thủy", "Sa Trung Thổ", "Thiên Thượng Hỏa", "Thạch Lựu Mộc", "Đại Hải Thủy"];
+  var THAN = [["Thanh Long", 1], ["Minh Đường", 1], ["Thiên Hình", 0], ["Chu Tước", 0], ["Kim Quỹ", 1], ["Kim Đường", 1],
+    ["Bạch Hổ", 0], ["Ngọc Đường", 1], ["Thiên Lao", 0], ["Huyền Vũ", 0], ["Tư Mệnh", 1], ["Câu Trần", 0]];
+  var THAN_START = { 2: 0, 8: 0, 3: 2, 9: 2, 4: 4, 10: 4, 5: 6, 11: 6, 6: 8, 0: 8, 7: 10, 1: 10 };
+  var TRUC = [["Kiến", 0, "Hợp xuất hành, gặp gỡ; kỵ động thổ"], ["Trừ", 1, "Hợp trừ bỏ việc cũ, chữa bệnh, dọn dẹp"],
+    ["Mãn", 1, "Hợp cầu tài, mở cửa hàng, nhập kho"], ["Bình", 0, "Bình thường, hợp sửa sang, việc nhỏ"],
+    ["Định", 1, "Hợp ký kết, giao dịch, nhập học"], ["Chấp", 1, "Hợp lập khế ước, xây dựng, tuyển người"],
+    ["Phá", -1, "Kỵ việc lớn, chỉ hợp phá dỡ"], ["Nguy", -1, "Nên thận trọng, tránh việc mạo hiểm"],
+    ["Thành", 1, "Hợp khai trương, cưới hỏi, nhập trạch"], ["Thâu", 0, "Hợp thu hoạch, thu nợ; kỵ khai trương"],
+    ["Khai", 1, "Hợp khai trương, nhập trạch, cầu tài"], ["Bế", -1, "Kỵ khởi công, khai trương"]];
+  var MUC = ["", "Xấu", "Kém", "Bình thường", "Khá", "Tốt"];
+
+  function tietMonthChi(jd) { // tháng theo tiết khí: Lập xuân (315°) bắt đầu tháng Dần
+    var deg = sunLongitudeRad(jd + 0.5) * 180 / PI;
+    return (2 + INT(((deg - 315 + 360) % 360) / 30)) % 12;
+  }
+  function tuoi(dd, mm, yy) {
+    var L = solar2Lunar(dd, mm, yy), y = L.year;
+    return { lunarYear: y, canChi: canChiYear(y), chi: (y + 8) % 12, chiName: CHI[(y + 8) % 12],
+      menh: NAP_AM[INT((((y - 4) % 60) + 60) % 60 / 2)], lunar: L };
+  }
+  function danhGia(dd, mm, yy, chiTuoi) {
+    var L = solar2Lunar(dd, mm, yy), jd = L.jd, dchi = (jd + 1) % 12;
+    var mchi = (L.month + 1) % 12, than = THAN[(dchi - THAN_START[mchi] + 12) % 12];
+    var tr = TRUC[(dchi - tietMonthChi(jd) + 12) % 12];
+    var score = 3, ly = [];
+    score += than[1] ? 1 : -1;
+    ly.push({ ok: than[1] ? 1 : -1, t: "Ngày " + (than[1] ? "Hoàng đạo" : "Hắc đạo") + " (" + than[0] + ")",
+      n: than[1] ? "Ngày tốt, thuận cho nhiều việc" : "Không hợp việc lớn, khai trương" });
+    score += tr[1];
+    ly.push({ ok: tr[1], t: "Trực " + tr[0], n: tr[2] });
+    var res = { L: L, canChiNgay: canChiDay(jd), than: than[0], hoangDao: !!than[1], truc: tr[0] };
+    if (chiTuoi != null) {
+      var diff = (dchi - chiTuoi + 12) % 12, ten = CHI[chiTuoi];
+      if (diff === 6) { score -= 2; res.xung = true; ly.push({ ok: -1, t: "Xung tuổi " + ten, n: "Ngày " + CHI[dchi] + " xung " + ten + " – nên tránh việc quan trọng" }); }
+      else if ((dchi + chiTuoi) % 12 === 1) { score += 1; ly.push({ ok: 1, t: "Lục hợp với tuổi " + ten, n: CHI[dchi] + " – " + ten + " hợp nhau" }); }
+      else if (dchi % 4 === chiTuoi % 4 && dchi !== chiTuoi) { score += 1; ly.push({ ok: 1, t: "Tam hợp với tuổi " + ten, n: CHI[dchi] + " – " + ten + " cùng nhóm tam hợp" }); }
+      else ly.push({ ok: 0, t: "Không xung tuổi " + ten, n: "Ngày " + CHI[dchi] + " – tuổi " + ten + " bình hòa" });
+      res.gioTot = gioTotTheoTuoi(jd, chiTuoi);
+    }
+    if (res.xung) score = Math.min(score, 2);
+    score = Math.max(1, Math.min(5, score));
+    res.diem = score; res.muc = MUC[score]; res.lyDo = ly;
+    return res;
+  }
+  function gioTotTheoTuoi(jd, chiTuoi) {
+    var s = GIO_HD[((jd + 1) % 12) % 6], out = [];
+    for (var i = 0; i < 12; i++) if (s.charAt(i) == "1" && (i - chiTuoi + 12) % 12 !== 6)
+      out.push(CHI[i] + " (" + ((i * 2 + 23) % 24) + "–" + ((i * 2 + 1) % 24) + "h)");
+    return out;
+  }
+  function isoWeek(dd, mm, yy) {
+    var d = new Date(Date.UTC(yy, mm - 1, dd)), day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day);
+    var y0 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil(((d - y0) / 86400000 + 1) / 7);
+  }
+
   root.Lunar = {
     jdFromDate: jdFromDate, jdToDate: jdToDate, solar2Lunar: solar2Lunar,
     canChiYear: canChiYear, canChiMonth: canChiMonth, canChiDay: canChiDay,
-    canChiHour: canChiHour, tietKhi: tietKhi, gioHoangDao: gioHoangDao
+    canChiHour: canChiHour, tietKhi: tietKhi, gioHoangDao: gioHoangDao,
+    tuoi: tuoi, danhGia: danhGia, isoWeek: isoWeek, CHI: CHI
   };
   if (typeof module !== "undefined") module.exports = root.Lunar;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -5,99 +5,113 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lịch Việt</title>
 <link rel="stylesheet" href="style.css">
+<script>
+  // Áp sáng/tối ngay khi mở để không bị nháy
+  (function () {
+    var dark = false;
+    try { dark = window.AndroidBridge ? AndroidBridge.isDark() : matchMedia("(prefers-color-scheme: dark)").matches; } catch (e) {}
+    document.documentElement.className = dark ? "dark-pre" : "";
+    window.__dark = dark;
+  })();
+</script>
 </head>
 <body>
 <main>
-  <!-- TAB HÔM NAY -->
+  <!-- HÔM NAY -->
   <section id="tab-today" class="tab active">
-    <div class="card hero">
-      <div id="clock" class="clock">--:--</div>
-      <div id="sec" class="sec">--</div>
-      <div id="solarText" class="solar"></div>
-      <div class="lunarBig">
-        <div class="lunarDay" id="lunarDay">--</div>
-        <div>
-          <div id="lunarMonthText" class="lm"></div>
-          <div id="lunarYearText" class="ly"></div>
-        </div>
-      </div>
+    <div class="head">
+      <div><div class="s" id="hWeek"></div><div class="b" id="hDate"></div></div>
+      <button class="round btnRefresh" aria-label="Cập nhật thời tiết"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
     </div>
-
-    <div class="card weatherNow" id="weatherNow">
-      <div class="loc"><svg class="pin" viewBox="0 0 24 24"><path fill="#FFB547" d="M12,2a7,7 0 0 0 -7,7c0,5 7,13 7,13s7,-8 7,-13a7,7 0 0 0 -7,-7zm0,9.5a2.5,2.5 0 1 1 0,-5a2.5,2.5 0 0 1 0,5z"/></svg><span id="place">Đang lấy vị trí…</span>
-        <button id="btnRefresh" class="icon" title="Cập nhật"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20,11a8,8 0 1 0 -2.3,5.7M20,4v7h-7"/></svg></button></div>
-      <div class="wrow">
-        <div id="wIcon" class="wicon"></div>
-        <div>
-          <div id="wTemp" class="wtemp">--°</div>
-          <div id="wDesc" class="wdesc"></div>
-        </div>
-      </div>
-      <div class="hint" id="wHint"></div>
-      <div class="wmeta" id="wMeta"></div>
-      <div class="updated" id="wUpdated"></div>
+    <div class="tiles">
+      <div class="tile t1"><div class="l">Bây giờ</div><div class="big" id="clock">--:--</div><div class="l" id="gioCC"></div></div>
+      <div class="tile t2"><div class="l">Âm lịch</div><div class="big" id="lunarBig">--</div><div class="l" id="lunarYear"></div></div>
     </div>
-
-    <div class="card" id="dayInfo"></div>
+    <div class="wx">
+      <div class="top"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s7-7.6 7-12a7 7 0 1 0-14 0c0 4.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span id="place">Đang lấy vị trí…</span></span><span id="upd"></span></div>
+      <div class="main"><div class="ic" id="wIcon"></div><div><div class="t" id="wTemp">--°</div><div class="d" id="wDesc"></div></div><div class="hl" id="wHL"></div></div>
+    </div>
+    <div class="hint" id="hint1"></div>
+    <div class="hours5" id="hours5"></div>
+    <div class="card" id="ageCard"></div>
+    <div class="card rows" id="todayInfo"></div>
   </section>
 
-  <!-- TAB LỊCH THÁNG -->
+  <!-- LỊCH -->
   <section id="tab-cal" class="tab">
-    <div class="card">
-      <div class="calHead">
-        <button class="icon" id="prevM">‹</button>
-        <div id="calTitle" class="calTitle"></div>
-        <button class="icon" id="nextM">›</button>
-      </div>
-      <div class="grid wd">
-        <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div class="sat">T7</div><div class="sun">CN</div>
-      </div>
-      <div class="grid" id="calGrid"></div>
-      <button class="link" id="btnToday">Về hôm nay</button>
+    <div class="calhead">
+      <button class="navb" id="prevM" aria-label="Tháng trước">‹</button>
+      <div class="ttl"><b id="calTitle"></b><div id="calSub"></div></div>
+      <button class="navb" id="nextM" aria-label="Tháng sau">›</button>
     </div>
-    <div class="card" id="selInfo"></div>
+    <div class="card" style="padding:10px 8px 10px 4px">
+      <div class="cg wd"><span>Tuần</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span style="color:var(--red)">CN</span></div>
+      <div class="cg" id="calGrid"></div>
+    </div>
+    <div class="selday" id="selDay"></div>
+    <div class="card" id="selAge"></div>
+    <div class="card"><div class="sec">SẮP TỚI</div><div id="events"></div></div>
+    <button class="link" id="btnToday" style="text-align:center">Về hôm nay</button>
   </section>
 
-  <!-- TAB THỜI TIẾT -->
+  <!-- THỜI TIẾT -->
   <section id="tab-weather" class="tab">
-    <div class="card">
-      <h3>24 giờ tới</h3>
-      <div class="hint" id="hint2"></div>
-      <div class="hourly" id="hourly"></div>
+    <div class="head">
+      <div><div class="s" id="place2"></div><div class="b">Thời tiết</div></div>
+      <button class="round btnRefresh" aria-label="Cập nhật thời tiết"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
     </div>
-    <div class="card">
-      <h3>7 ngày tới</h3>
-      <div id="daily"></div>
+    <div class="hero">
+      <div class="main"><div class="ic" id="hIcon"></div><div><div class="t" id="hTemp">--°</div><div class="d" id="hDesc"></div></div></div>
+      <div class="met" id="hMet"></div>
     </div>
-    <div class="note">Dữ liệu: Open-Meteo (CC BY 4.0) · đổi mô hình dự báo trong Cài đặt</div>
+    <div class="hint" id="hint2"></div>
+    <div><div class="sec" style="padding-left:4px">24 GIỜ TỚI</div><div class="h24" id="h24"></div></div>
+    <div class="card"><div class="sec">7 NGÀY TỚI</div><div id="d7"></div></div>
+    <div class="src" id="src"></div>
   </section>
 
-  <!-- TAB CÀI ĐẶT -->
+  <!-- CÀI ĐẶT -->
   <section id="tab-set" class="tab">
+    <div class="head"><div><div class="s">Lịch Việt</div><div class="b">Cài đặt</div></div></div>
     <div class="card">
-      <h3>Nguồn dự báo thời tiết</h3>
-      <div id="models"></div>
+      <div class="sec">NGÀY SINH CỦA BẠN</div>
+      <label class="field">Ngày sinh (dương lịch) – dùng để xem ngày tốt xấu theo tuổi
+        <input type="date" id="birth" min="1900-01-01" max="2100-12-31"></label>
+      <div class="muted" id="birthInfo" style="margin-top:8px"></div>
+    </div>
+    <div class="card"><div class="sec">NGUỒN DỰ BÁO THỜI TIẾT</div><div id="models"></div></div>
+    <div class="card">
+      <div class="sec">TỰ CẬP NHẬT THỜI TIẾT (APP &amp; WIDGET)</div>
+      <div class="chips" id="interval"></div>
     </div>
     <div class="card">
-      <h3>Thêm widget ra màn hình chính</h3>
+      <div class="sec">THÊM WIDGET RA MÀN HÌNH CHÍNH</div>
       <div class="wgrid" id="addWidgets"></div>
-      <div class="muted" style="margin-top:8px">Hoặc: giữ lâu màn hình chính → Widget → Lịch Việt. Khi thêm sẽ mở màn hình tùy chỉnh (nền trong suốt, màu chữ, kiểu ngày giờ…).</div>
+      <div class="muted" style="margin-top:10px">Hoặc giữ lâu màn hình chính → Tiện ích (Widget) → Lịch Việt.</div>
     </div>
-    <div class="card">
-      <h3>Widget đang dùng</h3>
-      <div id="myWidgets"></div>
-    </div>
-    <div class="note">Lịch Việt 1.1 · Âm lịch theo thuật toán thiên văn, múi giờ GMT+7</div>
+    <div class="card"><div class="sec">WIDGET ĐANG DÙNG</div><div id="myWidgets"></div></div>
+    <div class="note">Giao diện sáng/tối tự theo cài đặt của máy.<br>Lịch Việt 2.0 · Âm lịch theo thuật toán thiên văn, múi giờ GMT+7</div>
   </section>
 </main>
 
-<nav class="bottom">
-  <button data-tab="tab-today" class="active"><span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3,11l9,-7l9,7v9a1,1 0 0 1 -1,1h-5v-6h-6v6h-5a1,1 0 0 1 -1,-1z"/></svg></span>Hôm nay</button>
-  <button data-tab="tab-cal"><span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5,5h14a2,2 0 0 1 2,2v12a2,2 0 0 1 -2,2h-14a2,2 0 0 1 -2,-2v-12a2,2 0 0 1 2,-2zM3,10h18M8,3v4M16,3v4"/></svg></span>Lịch tháng</button>
-  <button data-tab="tab-weather"><span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M7,19h10a4,4 0 0 0 0.4,-7.98A6,6 0 0 0 6.1,11.6A3.7,3.7 0 0 0 7,19z"/></svg></span>Thời tiết</button>
-  <button data-tab="tab-set"><span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12,2v3M12,19v3M2,12h3M19,12h3M4.9,4.9l2.1,2.1M17,17l2.1,2.1M4.9,19.1l2.1,-2.1M17,7l2.1,-2.1"/></svg></span>Cài đặt</button>
-</nav>
+<!-- MÀN XEM NGÀY THEO TUỔI -->
+<div class="screen" id="scrAge">
+  <main style="display:flex;flex-direction:column;gap:12px">
+    <div class="sh"><button id="ageBack" aria-label="Quay lại">‹</button><b>Xem ngày theo tuổi</b></div>
+    <div class="card age" id="ageProfile"></div>
+    <div class="ehero" id="ageHero"></div>
+    <div class="card" id="ageWhy"></div>
+    <div class="card"><div class="sec" id="ageUpTitle">14 NGÀY TỚI</div><div id="ageUp"></div></div>
+    <div class="note">Theo lịch vạn niên truyền thống: ngày hoàng đạo – hắc đạo, 12 trực, xung – hợp tuổi.<br>Mang tính tham khảo văn hóa dân gian.</div>
+  </main>
+</div>
 
+<nav class="bottom">
+  <button data-tab="tab-today" class="active"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>Hôm nay</button>
+  <button data-tab="tab-cal"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/></svg></span>Lịch</button>
+  <button data-tab="tab-weather"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19h10a4 4 0 0 0 .4-8 6 6 0 0 0-11.3.6A3.7 3.7 0 0 0 7 19z"/></svg></span>Thời tiết</button>
+  <button data-tab="tab-set"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>Cài đặt</button>
+</nav>
 <div id="toast"></div>
 <script src="icons.js"></script>
 <script src="wx.js"></script>

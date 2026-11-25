@@ -31,11 +31,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setStatusBarColor(Color.parseColor("#0f1b2d"));
-        getWindow().setNavigationBarColor(Color.parseColor("#0b1524"));
-
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#0f1b2d"));
+        applyBars();
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -53,6 +50,27 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String getCachedWeather() { return cachedPayload(); }
+
+        @JavascriptInterface
+        public boolean isDark() { return WidgetRenderer.isNight(MainActivity.this); }
+
+        @JavascriptInterface
+        public String getBirth() { return Weather.birth(MainActivity.this); }
+
+        @JavascriptInterface
+        public void setBirth(String b) {
+            Weather.setBirth(MainActivity.this, b);
+            main.post(() -> WidgetRenderer.updateAll(MainActivity.this));
+        }
+
+        @JavascriptInterface
+        public int getInterval() { return Weather.interval(MainActivity.this); }
+
+        @JavascriptInterface
+        public void setInterval(int m) {
+            Weather.setInterval(MainActivity.this, m);
+            WidgetRenderer.schedulePeriodic(MainActivity.this);
+        }
 
         @JavascriptInterface
         public String getModel() { return Weather.model(MainActivity.this); }
@@ -109,6 +127,27 @@ public class MainActivity extends Activity {
             final String err = ok ? "null" : JSONObject.quote(Weather.hasLocation(this) ? "Không tải được thời tiết (kiểm tra mạng)" : "Chưa có vị trí");
             main.post(() -> web.evaluateJavascript("window.onNativeWeather(" + JSONObject.quote(payload) + "," + err + ")", null));
         }).start();
+    }
+
+    /** Màu thanh trạng thái / điều hướng theo sáng – tối của máy. */
+    @SuppressWarnings("deprecation")
+    private void applyBars() {
+        boolean dark = WidgetRenderer.isNight(this);
+        int bg = dark ? Color.parseColor("#11141B") : Color.parseColor("#F6F8FD");
+        getWindow().setStatusBarColor(bg);
+        getWindow().setNavigationBarColor(bg);
+        int flags = 0;
+        if (!dark) flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        getWindow().getDecorView().setSystemUiVisibility(flags);
+        if (web != null) web.setBackgroundColor(bg);
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        applyBars();
+        if (web != null) web.evaluateJavascript("window.setDark && window.setDark(" + WidgetRenderer.isNight(this) + ")", null);
+        WidgetRenderer.updateAll(this);
     }
 
     private boolean hasLocPermission() {

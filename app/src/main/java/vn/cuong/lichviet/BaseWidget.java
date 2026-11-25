@@ -8,19 +8,27 @@ import android.os.Bundle;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/** Lớp cha cho các widget: vẽ lại, hẹn giờ 0h, tự làm mới thời tiết khi dữ liệu cũ. */
+/** Lớp cha cho các widget: vẽ lại, hẹn giờ 0h & chu kỳ cập nhật, nút làm mới thời tiết. */
 public abstract class BaseWidget extends AppWidgetProvider {
     public static final String ACTION_REFRESH = "vn.cuong.lichviet.REFRESH";
-    private static final long STALE_MS = 25 * 60 * 1000L;
     private static final AtomicBoolean busy = new AtomicBoolean(false);
 
     protected abstract String type();
 
     @Override
+    public void onEnabled(Context c) {
+        WidgetRenderer.schedulePeriodic(c);
+    }
+
+    @Override
     public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
-        for (int id : ids) WidgetRenderer.render(c, m, id, type());
+        for (int id : ids) {
+            try { WidgetRenderer.render(c, m, id, type()); } catch (Exception ignored) {}
+        }
         WidgetRenderer.scheduleMidnight(c);
-        if (System.currentTimeMillis() - Weather.cachedTs(c) > STALE_MS) refreshAsync(c);
+        WidgetRenderer.schedulePeriodic(c);
+        long stale = Weather.interval(c) * 60_000L - 60_000L;
+        if (System.currentTimeMillis() - Weather.cachedTs(c) > stale) refreshAsync(c, this);
     }
 
     @Override
@@ -30,7 +38,7 @@ public abstract class BaseWidget extends AppWidgetProvider {
 
     @Override
     public void onReceive(Context c, Intent i) {
-        if (ACTION_REFRESH.equals(i.getAction())) refreshAsync(c);
+        if (ACTION_REFRESH.equals(i.getAction())) refreshAsync(c, this);
         else super.onReceive(c, i);
     }
 
@@ -39,15 +47,19 @@ public abstract class BaseWidget extends AppWidgetProvider {
         for (int id : ids) Weather.prefs(c).edit().remove("wcfg_" + id).apply();
     }
 
-    private void refreshAsync(final Context c) {
+    /** Tải thời tiết ở luồng nền; widget hiện "Đang cập nhật…" trong lúc chờ. */
+    static void refreshAsync(final Context c, android.content.BroadcastReceiver r) {
         if (!Weather.hasLocation(c) || !busy.compareAndSet(false, true)) return;
-        final PendingResult pr = goAsync();
+        final android.content.BroadcastReceiver.PendingResult pr = r.goAsync();
         final Context app = c.getApplicationContext();
+        WidgetRenderer.refreshing = true;
+        WidgetRenderer.updateAll(app);
         new Thread(() -> {
             try {
                 Weather.refresh(app);
-                WidgetRenderer.updateAll(app);
             } finally {
+                WidgetRenderer.refreshing = false;
+                WidgetRenderer.updateAll(app);
                 busy.set(false);
                 pr.finish();
             }

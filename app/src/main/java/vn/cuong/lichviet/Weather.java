@@ -28,6 +28,12 @@ public final class Weather {
     public static String model(Context c) { return prefs(c).getString("model", DEFAULT_MODEL); }
     public static void setModel(Context c, String m) { prefs(c).edit().putString("model", m).apply(); }
 
+    /** Chu kỳ tự cập nhật thời tiết (phút): 15 | 30 | 60. */
+    public static int interval(Context c) { return prefs(c).getInt("interval", 30); }
+    public static void setInterval(Context c, int m) { prefs(c).edit().putInt("interval", m).apply(); }
+    public static String birth(Context c) { return prefs(c).getString("birth", ""); }
+    public static void setBirth(Context c, String b) { prefs(c).edit().putString("birth", b == null ? "" : b).apply(); }
+
     public static void saveLocation(Context c, double lat, double lon) {
         prefs(c).edit().putString("lat", String.valueOf(lat)).putString("lon", String.valueOf(lon)).apply();
     }
