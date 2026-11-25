@@ -155,27 +155,28 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var dm = L.day + "/" + L.month + (L.leap ? "N" : "");
     var wIc = function (s, code, day) { return '<span class="wi" style="width:' + s + "px;height:" + s + 'px">' + (cur ? WX.icon(code == null ? cur.weather_code : code, day == null ? cur.is_day : day) : WX_ICONS.partly_day) + "</span>"; };
     var temp = cur ? Math.round(cur.temperature_2m) + "°" : "--°";
-    var place = data && data.place ? data.place.split(",")[0] : "Vị trí hiện tại";
+    var place = (data && data.place ? data.place.split(",")[0] : "Vị trí hiện tại").replace("Thành phố ", "TP. ").replace("Phường ", "P. ").replace("Quận ", "Q. ");
     var upd = pad(now.getHours()) + ":" + pad(now.getMinutes());
     var rf = '<span class="rf" style="background:' + p.cB + ';color:' + p.acc + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></span>';
     var hint = w ? WX.rainHint(w) : "Mở app để lấy vị trí";
     var dateT = cfg.date === "long" ? THU[wd] + ", " + d + " tháng " + m : cfg.date === "short" ? THU_N[wd] + " · " + pad(d) + "/" + pad(m) : THU[wd] + ", " + pad(d) + "/" + pad(m) + "/" + y;
     var h = "";
     if (TYPE === "clock") {
-      h = '<div class="row"><div class="f1">' + ck(52) + '<div class="ell" style="font-size:14px;font-weight:600;margin-top:6px">' + dateT + (cfg.week ? " · Tuần " + wk : "") + "</div>" +
-        (cfg.lunar ? '<div class="ell" style="font-size:12px;color:' + p.fg2 + ';margin-top:3px">Âm lịch ' + dm + " · " + Lunar.canChiYear(L.year) + "</div>" : "") + "</div>" +
-        (cfg.weather ? '<div style="text-align:right"><div class="row" style="justify-content:flex-end">' + wIc(36) + '<span style="font-size:28px;font-weight:600;margin-left:4px">' + temp + "</span></div>" +
-          '<div style="font-size:11px;color:' + p.fg2 + '">' + (cur ? WX.desc(cur.weather_code) + " · " + Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "°" : "") + "</div>" +
-          (cfg.place ? '<div style="font-size:11px;color:' + p.fg2 + '">' + place + "</div>" : "") + "</div>" : "") + "</div>" +
-        (cfg.weather ? '<div class="row" style="margin-top:8px"><div class="f1">' + cp(hint, 1) + '</div><span style="font-size:10px;color:' + p.fg2 + '">' + upd + "</span>" + rf + "</div>" : "");
+      h = '<div class="row"><div class="f1">' + ck(46) + "</div>" +
+        (cfg.weather ? '<div style="text-align:right"><div class="row" style="justify-content:flex-end">' + wIc(32) + '<span style="font-size:26px;font-weight:600;margin-left:4px">' + temp + "</span></div>" +
+          '<div style="font-size:11px;color:' + p.fg2 + '">' + (cur ? WX.desc(cur.weather_code) + " · " + Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "°" : "") + "</div></div>" : "") + "</div>" +
+        '<div class="ell" style="font-size:14px;font-weight:600;margin-top:6px">' + dateT + (cfg.week ? " · Tuần " + wk : "") + "</div>" +
+        '<div class="row" style="margin-top:3px;font-size:12px;color:' + p.fg2 + '"><div class="f1 ell">' + (cfg.lunar ? "Âm lịch " + dm + " · " + Lunar.canChiYear(L.year) : "") + "</div>" +
+        (cfg.weather && cfg.place ? '<span class="ell" style="font-size:11px;max-width:140px;margin-left:8px">' + place + "</span>" : "") + "</div>" +
+        (cfg.weather ? '<div class="row" style="margin-top:6px"><div class="f1">' + cp(hint, 1) + '</div><span style="font-size:10px;color:' + p.fg2 + '">' + upd + "</span>" + rf + "</div>" : "");
     } else if (TYPE === "date") {
       var t = birth ? Lunar.tuoi.apply(null, birth.split("-").map(Number).reverse()) : null, g = Lunar.danhGia(d, m, y, t && cfg.tuoi ? t.chi : null);
-      var l3 = t && cfg.tuoi ? "Tuổi " + t.chiName + ": " + g.muc + " · giờ tốt " + g.gioTot.slice(0, 3).map(function (x) { return x.split(" ")[0]; }).join(", ")
-        : (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · giờ tốt " + Lunar.gioHoangDao(L.jd).slice(0, 3).map(function (x) { return x.split(" ")[0]; }).join(", ");
-      h = '<div class="row"><div style="width:96px;text-align:center;flex:none"><div style="font-size:13px;font-weight:600;color:' + (wd === 0 ? p.red : p.fg) + '">' + THU[wd] + '</div><div style="font-size:54px;font-weight:600;line-height:1.05;color:' + p.acc + '">' + d +
+      var l3 = t && cfg.tuoi ? "Tuổi " + t.chiName + ": " + g.muc : "Ngày " + (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · " + g.than;
+      var l4 = "Giờ tốt: " + (t && cfg.tuoi ? g.gioTot : Lunar.gioHoangDao(L.jd)).slice(0, 4).map(function (x) { return x.split(" ")[0]; }).join(", ");
+      h = '<div class="row"><div style="width:84px;text-align:center;flex:none"><div style="font-size:13px;font-weight:600;color:' + (wd === 0 ? p.red : p.fg) + '">' + THU[wd] + '</div><div style="font-size:50px;font-weight:600;line-height:1.05;color:' + p.acc + '">' + d +
         '</div><div style="font-size:11px;color:' + p.fg2 + '">Tháng ' + m + " · " + y + '</div></div><div class="f1" style="margin-left:12px">' + (cfg.week ? cp("Tuần " + wk, 1) + " " : "") + cp("ÂL " + dm, 0) +
         '<div class="ell" style="font-size:12px;margin-top:8px">Ngày ' + Lunar.canChiDay(L.jd) + " · tháng " + Lunar.canChiMonth(L.month, L.year) + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:5px">Năm ' + Lunar.canChiYear(L.year) +
-        " · tháng " + THANG[L.month] + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:5px">' + l3 + "</div></div></div>";
+        " · tháng " + THANG[L.month] + '</div><div class="ell" style="font-size:11px;font-weight:600;margin-top:4px">' + l3 + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:4px">' + l4 + "</div></div></div>";
     } else if (TYPE === "weather") {
       var hrs = "";
       if (w) { var i0 = WX.hourIndex(w); for (var k = 0; k < 5; k++) { var i = i0 + 1 + k * 2; if (i >= w.hourly.time.length) break;
@@ -183,8 +184,8 @@ input[type=range]{width:100%;accent-color:var(--tile)}
           '<div style="font-size:13px;font-weight:600">' + Math.round(w.hourly.temperature_2m[i]) + '°</div><div style="font-size:10px;color:' + p.rain + '">' + WX.popText(w.hourly, i) + "</div></div>"; } }
       h = '<div class="row"><div class="f1 ell" style="font-size:12px;font-weight:600">' + (cfg.place ? place : "") + '</div><span style="font-size:10px;color:' + p.fg2 + '">' + upd + "</span>" + rf + "</div>" +
         '<div class="row" style="margin-top:4px">' + wIc(46) + '<span style="font-size:36px;font-weight:600;margin-left:6px">' + temp + '</span><div class="f1" style="margin-left:12px"><div class="ell" style="font-size:13px;font-weight:600">' +
-        (cur ? WX.desc(cur.weather_code) + " · cảm giác " + Math.round(cur.apparent_temperature) + "°" : "Chưa có dữ liệu") + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:4px">' +
-        (w ? "Cao " + Math.round(w.daily.temperature_2m_max[0]) + "° · Thấp " + Math.round(w.daily.temperature_2m_min[0]) + "° · Ẩm " + cur.relative_humidity_2m + "%" : "") + "</div></div></div>" +
+        (cur ? WX.desc(cur.weather_code) + " · ẩm " + cur.relative_humidity_2m + "%" : "Chưa có dữ liệu") + '</div><div class="ell" style="font-size:11px;color:' + p.fg2 + ';margin-top:4px">' +
+        (w ? "Cảm giác " + Math.round(cur.apparent_temperature) + "° · " + Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "°" : "") + "</div></div></div>" +
         '<div class="row" style="margin:10px 0 8px">' + hrs + "</div>" + (cfg.weather ? cp(hint, 1) : "");
     } else if (TYPE === "calendar") {
       h = '<div class="row"><div class="f1" style="font-size:12px;font-weight:600;color:' + (wd === 0 ? p.red : p.fg) + '">' + THU[wd] + "</div>" + (cfg.week ? cp("T" + wk, 1) : "") + "</div>" +

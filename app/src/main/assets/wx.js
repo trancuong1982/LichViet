@@ -32,14 +32,15 @@
   function hourOf(s) { return parseInt(s.slice(11, 13), 10); }
   function rainHint(w) {
     try {
-      var h = w.hourly, t = h.time, i0 = hourIndex(w), end = Math.min(i0 + 12, t.length), i;
-      if (rainy(h, i0)) {
-        for (i = i0 + 1; i < end; i++) if (!rainy(h, i)) return "Đang mưa · dự kiến tạnh khoảng " + hourOf(t[i]) + "h";
-        return "Mưa kéo dài trong 12 giờ tới";
+      var h = w.hourly, t = h.time, i0 = hourIndex(w), end = Math.min(i0 + 12, t.length), i, c = w.current;
+      var now = num(c.weather_code, 0) >= 51 || num(c.precipitation, 0) >= 0.1;
+      if (now) {
+        for (i = i0 + 1; i < end; i++) if (!rainy(h, i)) return "Đang mưa · tạnh khoảng " + hourOf(t[i]) + "h";
+        return "Đang mưa · kéo dài nhiều giờ";
       }
-      for (i = i0 + 1; i < end; i++) if (rainy(h, i)) {
+      for (i = i0; i < end; i++) if (rainy(h, i)) {
         var p = h.precipitation_probability ? h.precipitation_probability[i] : null;
-        return (h.weather_code[i] >= 95 ? "Có dông" : "Có thể mưa") + " khoảng " + hourOf(t[i]) + "h" + (p != null ? " (" + p + "%)" : "");
+        return (h.weather_code[i] >= 95 ? "Có dông" : "Có thể mưa") + (i === i0 ? " trong giờ này" : " khoảng " + hourOf(t[i]) + "h") + (p != null ? " (" + p + "%)" : "");
       }
       return "Không mưa trong 12 giờ tới";
     } catch (e) { return ""; }

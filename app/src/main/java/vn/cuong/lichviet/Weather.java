@@ -184,24 +184,25 @@ public final class Weather {
         return code >= 51 || (!Double.isNaN(prob) && prob >= 50) || mm >= 0.5;
     }
 
-    /** Câu dự báo mưa nắng ngắn cho 12 giờ tới. */
+    /** Câu dự báo mưa nắng ngắn cho 12 giờ tới (gọn để vừa widget). */
     public static String rainHint(JSONObject w) {
         try {
-            JSONObject h = w.getJSONObject("hourly");
+            JSONObject h = w.getJSONObject("hourly"), cur = w.getJSONObject("current");
             JSONArray t = h.getJSONArray("time");
             int i0 = currentHourIndex(w), end = Math.min(i0 + 12, t.length());
-            if (rainy(h, i0)) {
+            boolean rainingNow = cur.optInt("weather_code", 0) >= 51 || cur.optDouble("precipitation", 0) >= 0.1;
+            if (rainingNow) {
                 for (int i = i0 + 1; i < end; i++)
-                    if (!rainy(h, i)) return "Đang mưa · dự kiến tạnh khoảng " + hourOf(t.getString(i)) + "h";
-                return "Mưa kéo dài trong 12 giờ tới";
+                    if (!rainy(h, i)) return "Đang mưa · tạnh khoảng " + hourOf(t.getString(i)) + "h";
+                return "Đang mưa · kéo dài nhiều giờ";
             }
-            for (int i = i0 + 1; i < end; i++) {
+            for (int i = i0; i < end; i++) {
                 if (rainy(h, i)) {
                     int code = h.getJSONArray("weather_code").optInt(i, 0);
                     double prob = h.getJSONArray("precipitation_probability").optDouble(i, Double.NaN);
                     String kind = code >= 95 ? "Có dông" : "Có thể mưa";
-                    String p = Double.isNaN(prob) ? "" : " (" + Math.round(prob) + "%)";
-                    return kind + " khoảng " + hourOf(t.getString(i)) + "h" + p;
+                    String when = i == i0 ? " trong giờ này" : " khoảng " + hourOf(t.getString(i)) + "h";
+                    return kind + when + (Double.isNaN(prob) ? "" : " (" + Math.round(prob) + "%)");
                 }
             }
             return "Không mưa trong 12 giờ tới";

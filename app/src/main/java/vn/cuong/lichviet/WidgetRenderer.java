@@ -255,7 +255,9 @@ public final class WidgetRenderer {
     static String shortPlace(String p) {
         if (p == null) return "";
         int i = p.indexOf(',');
-        return i > 0 ? p.substring(0, i) : p;
+        String s = (i > 0 ? p.substring(0, i) : p).trim();
+        return s.replace("Thành phố ", "TP. ").replace("Phường ", "P. ").replace("Quận ", "Q. ")
+                .replace("Huyện ", "H. ").replace("Thị xã ", "TX. ").replace("Tỉnh ", "");
     }
     static String updatedText(Context c) {
         if (refreshing) return "Đang cập nhật…";
@@ -350,10 +352,10 @@ public final class WidgetRenderer {
             int code = cur.optInt("weather_code", 3);
             v.setImageViewResource(R.id.wx_icon, Weather.iconRes(code, cur.optInt("is_day", 1) == 1));
             v.setTextViewText(R.id.wx_temp, Math.round(cur.optDouble("temperature_2m", 0)) + "°");
-            v.setTextViewText(R.id.wx_desc, Weather.desc(code) + " · cảm giác " + Math.round(cur.optDouble("apparent_temperature", 0)) + "°");
-            v.setTextViewText(R.id.wx_hilo, "Cao " + Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0))
-                    + "° · Thấp " + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0))
-                    + "° · Ẩm " + cur.optInt("relative_humidity_2m", 0) + "%");
+            v.setTextViewText(R.id.wx_desc, Weather.desc(code) + " · ẩm " + cur.optInt("relative_humidity_2m", 0) + "%");
+            v.setTextViewText(R.id.wx_hilo, "Cảm giác " + Math.round(cur.optDouble("apparent_temperature", 0)) + "° · "
+                    + Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0)) + "°/"
+                    + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0)) + "°");
             v.setViewVisibility(R.id.hourly, View.VISIBLE);
             JSONArray ht = h.getJSONArray("time");
             int i0 = Weather.currentHourIndex(w);
@@ -394,16 +396,13 @@ public final class WidgetRenderer {
         v.setTextViewText(R.id.d_l2, "Năm " + Lunar.canChiYear(Lu.year) + " · tháng " + Lunar.THANG[Lu.month] + (Lu.leap ? " nhuận" : ""));
         p.fg2(R.id.d_l2);
         int ct = f.tuoi ? chiTuoi(c) : -1;
-        String l3;
-        if (ct >= 0) {
-            Lunar.DanhGia g = Lunar.danhGia(d, mo, y, ct);
-            l3 = "Tuổi " + Lunar.CHI[ct] + ": " + g.muc + " · giờ tốt " + Lunar.gioTot(Lu.jd, ct, 3);
-        } else {
-            Lunar.DanhGia g = Lunar.danhGia(d, mo, y, -1);
-            l3 = (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · giờ tốt " + Lunar.gioTot(Lu.jd, -1, 3);
-        }
-        v.setTextViewText(R.id.d_l3, l3);
-        p.fg2(R.id.d_l3);
+        Lunar.DanhGia g = Lunar.danhGia(d, mo, y, ct);
+        if (ct >= 0) v.setTextViewText(R.id.d_l3, "Tuổi " + Lunar.CHI[ct] + ": " + g.muc);
+        else v.setTextViewText(R.id.d_l3, "Ngày " + (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · " + g.than);
+        v.setTextViewText(R.id.d_l4, "Giờ tốt: " + Lunar.gioTot(Lu.jd, ct, 4));
+        if (ct >= 0) { if (g.diem >= 4) p.col(R.id.d_l3, "setTextColor", p.L.acc, p.D.acc); else if (g.diem <= 2) p.red(R.id.d_l3); else p.fg(R.id.d_l3); }
+        else p.fg(R.id.d_l3);
+        p.fg2(R.id.d_l4);
     }
 
     private static void renderCalendar(Painter p, Cfg f, int d, int mo, int y, int wd, int week, Lunar.Date Lu, JSONObject w) {
