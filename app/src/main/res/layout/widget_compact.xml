@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView android:id="@+id/bg" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:src="@drawable/widget_bg" android:scaleType="fitXY" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal"
+        android:paddingStart="16dp" android:paddingEnd="14dp" android:gravity="center_vertical">
+        <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextClock android:id="@+id/clock_thin" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:format24Hour="HH:mm" android:format12Hour="h:mm" android:textSize="34sp" android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false" android:textColor="#FFFFFF" android:singleLine="true" />
+            <TextClock android:id="@+id/clock_bold" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:format24Hour="HH:mm" android:format12Hour="h:mm" android:textSize="34sp" android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false" android:textColor="#FFFFFF" android:singleLine="true" android:visibility="gone" />
+        </FrameLayout>
+        <ImageView android:id="@+id/divider" android:layout_width="1dp" android:layout_height="30dp" android:src="@drawable/widget_divider"
+            android:scaleType="fitXY" android:layout_marginStart="12dp" android:layout_marginEnd="12dp" />
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView android:id="@+id/date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#FFFFFF" android:singleLine="true" android:ellipsize="end" />
+            <TextView android:id="@+id/lunar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="#FFFFFF" android:singleLine="true" android:ellipsize="end" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/weather_box" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <ImageView android:id="@+id/wx_icon" android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/wx_partly_day" />
+            <TextView android:id="@+id/wx_temp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" android:textColor="#FFFFFF" android:singleLine="true" android:ellipsize="end" android:layout_marginStart="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
