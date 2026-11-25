@@ -218,7 +218,7 @@ public final class WidgetRenderer {
             case "calendar3": renderCalendarWide(c, p, f, d, mo, y, wd, week, Lu, w); break;
             case "compact":
                 clock(p, f);
-                v.setTextViewText(R.id.date, THU_NGAN[wd] + ", " + two(d) + "/" + two(mo) + (f.week ? " · T" + week : ""));
+                v.setTextViewText(R.id.date, THU_NGAN[wd] + ", " + two(d) + "/" + two(mo) + (f.week ? " · W" + week : ""));
                 p.fg(R.id.date);
                 v.setViewVisibility(R.id.lunar, f.lunar ? View.VISIBLE : View.GONE);
                 v.setTextViewText(R.id.lunar, "ÂL " + lunarDM(Lu) + " · " + Lunar.canChiYear(Lu.year));
@@ -228,7 +228,7 @@ public final class WidgetRenderer {
                 break;
             default: // clock
                 clock(p, f);
-                v.setTextViewText(R.id.date, dateText(f.date, d, mo, y, wd) + (f.week ? " · Tuần " + week : ""));
+                v.setTextViewText(R.id.date, dateText(f.date, d, mo, y, wd) + (f.week ? " · W" + week : ""));
                 p.fg(R.id.date);
                 v.setViewVisibility(R.id.lunar, f.lunar ? View.VISIBLE : View.GONE);
                 v.setTextViewText(R.id.lunar, "Âm lịch " + lunarDM(Lu) + " · " + Lunar.canChiYear(Lu.year)
@@ -265,8 +265,16 @@ public final class WidgetRenderer {
         if (p == null) return "";
         int i = p.indexOf(',');
         String s = (i > 0 ? p.substring(0, i) : p).trim();
-        return s.replace("Thành phố ", "TP. ").replace("Phường ", "P. ").replace("Quận ", "Q. ")
-                .replace("Huyện ", "H. ").replace("Thị xã ", "TX. ").replace("Tỉnh ", "");
+        // Bỏ tiền tố hành chính cho gọn: "Thành phố Hồ Chí Minh" → "Hồ Chí Minh"; giữ dạng số: "Quận 1" → "Q.1"
+        String[][] pre = {{"Thành phố ", "TP."}, {"TP. ", "TP."}, {"TP ", "TP."}, {"Tỉnh ", ""}, {"Phường ", "P."}, {"Quận ", "Q."},
+                {"Huyện ", "H."}, {"Thị xã ", "TX."}, {"Thị trấn ", "TT."}, {"Xã ", "X."}};
+        for (String[] x : pre) {
+            if (s.startsWith(x[0])) {
+                String rest = s.substring(x[0].length()).trim();
+                return (!rest.isEmpty() && Character.isDigit(rest.charAt(0))) ? x[1] + rest : rest;
+            }
+        }
+        return s;
     }
     static String updatedText(Context c) {
         if (refreshing) return "Đang cập nhật…";
@@ -393,10 +401,10 @@ public final class WidgetRenderer {
         if (wd == 0) p.red(R.id.d_weekday); else p.fg(R.id.d_weekday);
         v.setTextViewText(R.id.d_day, String.valueOf(d));
         p.acc(R.id.d_day);
-        v.setTextViewText(R.id.d_month, "Tháng " + mo + " · " + y);
+        v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
         p.fg2(R.id.d_month);
         v.setViewVisibility(R.id.week_box, f.week ? View.VISIBLE : View.GONE);
-        v.setTextViewText(R.id.week, "Tuần " + week);
+        v.setTextViewText(R.id.week, "W" + week);
         p.chip(R.id.week_bg, R.id.week, 1);
         v.setTextViewText(R.id.lchip, "ÂL " + lunarDM(Lu));
         p.chip(R.id.lchip_bg, R.id.lchip, 0);
@@ -419,11 +427,11 @@ public final class WidgetRenderer {
         v.setTextViewText(R.id.d_weekday, THU[wd]);
         if (wd == 0) p.red(R.id.d_weekday); else p.fg(R.id.d_weekday);
         v.setViewVisibility(R.id.week_box, f.week ? View.VISIBLE : View.GONE);
-        v.setTextViewText(R.id.week, "T" + week);
+        v.setTextViewText(R.id.week, "W" + week);
         p.chip(R.id.week_bg, R.id.week, 1);
         v.setTextViewText(R.id.d_day, String.valueOf(d));
         p.acc(R.id.d_day);
-        v.setTextViewText(R.id.d_month, "Tháng " + mo + " · " + y);
+        v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
         p.fg2(R.id.d_month);
         v.setViewVisibility(R.id.lchip_box, f.lunar ? View.VISIBLE : View.GONE);
         v.setTextViewText(R.id.lchip, "ÂL " + lunarDM(Lu));
@@ -476,17 +484,19 @@ public final class WidgetRenderer {
         if (wd == 0) p.red(R.id.d_weekday); else p.fg(R.id.d_weekday);
         v.setTextViewText(R.id.d_day, String.valueOf(d));
         p.acc(R.id.d_day);
-        v.setTextViewText(R.id.d_month, "Tháng " + mo + " · " + y);
+        v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
         p.fg2(R.id.d_month);
         v.setViewVisibility(R.id.week_box, f.week ? View.VISIBLE : View.GONE);
-        v.setTextViewText(R.id.week, "Tuần " + week);
+        v.setTextViewText(R.id.week, "W" + week);
         p.chip(R.id.week_bg, R.id.week, 1);
         v.setTextViewText(R.id.lchip, "ÂL " + lunarDM(Lu));
         p.chip(R.id.lchip_bg, R.id.lchip, 0);
         v.setTextViewText(R.id.d_l1, "Ngày " + Lunar.canChiDay(Lu.jd));
         p.fg(R.id.d_l1);
-        v.setTextViewText(R.id.d_l2, "Tháng " + Lunar.canChiMonth(Lu.month, Lu.year) + " · " + Lunar.canChiYear(Lu.year));
+        v.setTextViewText(R.id.d_l2, "Tháng " + Lunar.canChiMonth(Lu.month, Lu.year));
         p.fg2(R.id.d_l2);
+        v.setTextViewText(R.id.d_l6, "Năm " + Lunar.canChiYear(Lu.year));
+        p.fg2(R.id.d_l6);
         String ev = Lunar.suKien(d, mo, Lu);
         v.setTextViewText(R.id.d_l3, ev != null ? ev : "Tiết " + Lunar.tietKhi(Lu.jd));
         if (ev != null) p.red(R.id.d_l3); else p.fg2(R.id.d_l3);
