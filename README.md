@@ -8,3 +8,6 @@ App Android: lịch dương – âm (Việt Nam), đồng hồ, thời tiết th
 
 ## Build
 GitHub Actions tự build mỗi lần push → tab **Actions** → bản build mới nhất → tải `LichViet-apk`.
+
+## Tải APK
+Link luôn trỏ tới bản mới nhất: https://github.com/trancuong1982/LichViet/releases/latest/download/LichViet.apk
