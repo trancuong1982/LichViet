@@ -134,9 +134,8 @@ public final class Lunar {
     public static int namAmTuoi(int dd, int mm, int yy) { return fromSolar(dd, mm, yy).year; }
     public static String menh(int lunarYear) { return NAP_AM[((((lunarYear - 4) % 60) + 60) % 60) / 2]; }
 
-    static final String[] TRUC_MOTA = {"hợp xuất hành, gặp gỡ", "hợp dọn dẹp, chữa bệnh", "hợp cầu tài, mở hàng",
-            "bình thường, việc nhỏ", "hợp ký kết, giao dịch", "hợp ký kết, xây dựng", "kỵ việc lớn", "nên thận trọng",
-            "hợp khai trương, cưới hỏi", "hợp thu hoạch, thu nợ", "hợp khai trương, cầu tài", "kỵ khởi công"};
+    static final String[] TRUC_MOTA = {"hợp xuất hành", "hợp dọn dẹp", "hợp cầu tài", "việc nhỏ", "hợp ký kết", "hợp ký kết",
+            "kỵ việc lớn", "nên thận trọng", "hợp khai trương", "hợp thu nợ", "hợp khai trương", "kỵ khởi công"};
 
     public static final class DanhGia {
         public int diem; public String muc; public boolean hoangDao, xung; public String than, truc;

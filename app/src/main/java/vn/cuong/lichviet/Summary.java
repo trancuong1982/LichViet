@@ -118,26 +118,29 @@ public final class Summary {
         int[] wxText = {R.id.wx_temp, R.id.wx_desc};
         for (int t : wxText) v.setTextColor(t, p.fg);
         v.setTextColor(R.id.wx_place, p.fg2);
+        v.setTextColor(R.id.wx_hilo, p.fg2);
         v.setTextColor(R.id.rain, p.fg);
         v.setViewVisibility(R.id.wx_col, f.weather ? View.VISIBLE : View.GONE);
         String place = WidgetRenderer.shortPlace(Weather.place(c));
         String upd = WidgetRenderer.updatedText(c);
-        v.setTextViewText(R.id.wx_place, (f.place && !place.isEmpty() ? place + " · " : "") + upd);
+        v.setTextViewText(R.id.wx_place, f.place && !place.isEmpty() && !WidgetRenderer.refreshing ? place : upd);
         if (w != null) {
             try {
                 JSONObject cur = w.getJSONObject("current"), dl = w.getJSONObject("daily");
                 int code = cur.optInt("weather_code", 3);
                 v.setImageViewResource(R.id.wx_icon, Weather.iconRes(code, cur.optInt("is_day", 1) == 1));
                 v.setTextViewText(R.id.wx_temp, Math.round(cur.optDouble("temperature_2m", 0)) + "°");
-                v.setTextViewText(R.id.wx_desc, Weather.desc(code) + " · " + Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0))
-                        + "°/" + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0)) + "°");
+                v.setTextViewText(R.id.wx_desc, Weather.desc(code));
+                v.setTextViewText(R.id.wx_hilo, Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0)) + "°/"
+                        + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0)) + "° · ẩm " + cur.optInt("relative_humidity_2m", 0) + "%");
                 String hint = Weather.rainHintShort(w);
                 v.setViewVisibility(R.id.rain_box, hint.isEmpty() ? View.GONE : View.VISIBLE);
                 v.setTextViewText(R.id.rain, hint);
             } catch (Exception ignored) {}
         } else {
             v.setTextViewText(R.id.wx_temp, "--°");
-            v.setTextViewText(R.id.wx_desc, "Mở app để lấy vị trí");
+            v.setTextViewText(R.id.wx_desc, "Chưa có dữ liệu");
+            v.setTextViewText(R.id.wx_hilo, "Mở app để lấy vị trí");
             v.setViewVisibility(R.id.rain_box, View.GONE);
         }
         Intent r = new Intent(c, SummaryWidget.class).setAction(BaseWidget.ACTION_REFRESH);
@@ -148,7 +151,7 @@ public final class Summary {
 
         // ----- Cột ngày 3D -----
         v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
-        v.setTextColor(R.id.d_month, p.fg2);
+        v.setTextColor(R.id.d_month, p.fg);
         v.setImageViewBitmap(R.id.big3d, draw3D(String.valueOf(d), redDay, p, dens));
         v.setTextViewText(R.id.d_weekday, WidgetRenderer.THU[wd]);
         v.setTextColor(R.id.d_weekday, redDay ? p.red : p.fg);
@@ -201,7 +204,7 @@ public final class Summary {
             v.setTextViewText(R.id.t_muc, g.diem == 3 ? "Bình thường" : "Ngày " + g.muc);
             v.setTextColor(R.id.t_muc, mc);
             v.setTextViewText(R.id.t_l1, reason(g.hoangDao ? 1 : -1, (g.hoangDao ? "Hoàng đạo · " : "Hắc đạo · ") + g.than, p));
-            v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " – " + g.trucMoTa, p));
+            v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " · " + g.trucMoTa, p));
             String ten = Lunar.CHI[ct];
             String qh = g.quanHe == -1 ? "Xung tuổi " + ten : g.quanHe == 1 ? "Lục hợp tuổi " + ten : g.quanHe == 2 ? "Tam hợp tuổi " + ten : "Không xung tuổi";
             v.setTextViewText(R.id.t_l3, reason(g.quanHe == -1 ? -1 : g.quanHe > 0 ? 1 : 0, qh, p));
@@ -211,13 +214,13 @@ public final class Summary {
             v.setTextViewText(R.id.t_muc, g.hoangDao ? "Hoàng đạo" : "Hắc đạo");
             v.setTextColor(R.id.t_muc, g.hoangDao ? p.good : p.red);
             v.setTextViewText(R.id.t_l1, reason(g.hoangDao ? 1 : -1, "Thần " + g.than, p));
-            v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " – " + g.trucMoTa, p));
-            v.setTextViewText(R.id.t_l3, "Nhập ngày sinh để xem theo tuổi");
+            v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " · " + g.trucMoTa, p));
+            v.setTextViewText(R.id.t_l3, "Nhập ngày sinh trong app");
             v.setTextColor(R.id.t_l3, p.fg2);
         }
         SpannableStringBuilder gio = new SpannableStringBuilder();
         append(gio, "Giờ tốt: ", p.fg2, false);
-        append(gio, Lunar.gioTot(L.jd, ct, 4), p.fg, true);
+        append(gio, Lunar.gioTot(L.jd, ct, 3), p.fg, true);
         v.setTextViewText(R.id.t_gio, gio);
         v.setViewVisibility(R.id.tuoi_col, View.VISIBLE);
 
