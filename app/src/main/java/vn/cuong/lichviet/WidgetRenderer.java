@@ -27,7 +27,7 @@ public final class WidgetRenderer {
     @SuppressWarnings("unchecked")
     static final Class<? extends BaseWidget>[] PROVIDERS = new Class[]{
             ClockWidget.class, DateWidget.class, WeatherWidget.class, WeatherSmallWidget.class,
-            CalendarWidget.class, CalendarWideWidget.class, CompactWidget.class};
+            CalendarWidget.class, CalendarWideWidget.class, CompactWidget.class, SummaryWidget.class};
 
     /** Đang tải thời tiết (để hiện "Đang cập nhật…" trên widget). */
     static volatile boolean refreshing = false;
@@ -40,6 +40,8 @@ public final class WidgetRenderer {
         String text = "auto";      // auto | white | dark
         String date = "full";      // full | long | short
         boolean h24 = true, bold = true, lunar = true, weather = true, week = true, place = true, tuoi = true;
+        String style = "glass";    // widget 5×3: glass | clear
+        String tone = "auto";      // widget 5×3: auto | dark | light
 
         static Cfg load(Context c, int id) {
             Cfg f = new Cfg();
@@ -59,6 +61,8 @@ public final class WidgetRenderer {
                 f.week = j.optBoolean("week", f.week);
                 f.place = j.optBoolean("place", f.place);
                 f.tuoi = j.optBoolean("tuoi", f.tuoi);
+                f.style = j.optString("style", f.style);
+                f.tone = j.optString("tone", f.tone);
             } catch (Exception ignored) {}
             return f;
         }
@@ -154,6 +158,7 @@ public final class WidgetRenderer {
         if (cls == DateWidget.class) return "date";
         if (cls == WeatherSmallWidget.class) return "weather2";
         if (cls == CalendarWideWidget.class) return "calendar3";
+        if (cls == SummaryWidget.class) return "summary";
         return "clock";
     }
     public static Class<? extends BaseWidget> classOf(String type) {
@@ -164,6 +169,7 @@ public final class WidgetRenderer {
             case "date": return DateWidget.class;
             case "weather2": return WeatherSmallWidget.class;
             case "calendar3": return CalendarWideWidget.class;
+            case "summary": return SummaryWidget.class;
             default: return ClockWidget.class;
         }
     }
@@ -190,6 +196,7 @@ public final class WidgetRenderer {
 
     public static void render(Context c, AppWidgetManager m, int id, String type) {
         Cfg f = Cfg.load(c, id);
+        if ("summary".equals(type)) { Summary.render(c, m, id, f); return; }
         RemoteViews v = new RemoteViews(c.getPackageName(), layoutOf(type));
         boolean auto = "auto".equals(f.theme);
         boolean useDark = "dark".equals(f.theme) || (auto && isNight(c));
@@ -535,6 +542,21 @@ public final class WidgetRenderer {
         t.set(Calendar.SECOND, 15);
         Intent i = new Intent(c, UpdateReceiver.class).setAction(UpdateReceiver.ACTION_MIDNIGHT);
         am.set(AlarmManager.RTC, t.getTimeInMillis(), PendingIntent.getBroadcast(c, 77, i,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        scheduleGreeting(c, am);
+    }
+
+    /** Đổi lời chào đúng các mốc 6h, 12h, 15h, 18h, 22h. */
+    static void scheduleGreeting(Context c, AlarmManager am) {
+        int[] marks = {6, 12, 15, 18, 22};
+        Calendar now = Calendar.getInstance(), t = Calendar.getInstance();
+        t.set(Calendar.MINUTE, 0); t.set(Calendar.SECOND, 5); t.set(Calendar.MILLISECOND, 0);
+        int h = now.get(Calendar.HOUR_OF_DAY), next = -1;
+        for (int mk : marks) if (mk > h) { next = mk; break; }
+        if (next < 0) { t.add(Calendar.DAY_OF_MONTH, 1); next = 6; }
+        t.set(Calendar.HOUR_OF_DAY, next);
+        Intent i = new Intent(c, UpdateReceiver.class).setAction(UpdateReceiver.ACTION_MIDNIGHT);
+        am.set(AlarmManager.RTC, t.getTimeInMillis(), PendingIntent.getBroadcast(c, 79, i,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
     }
 

@@ -25,6 +25,7 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
     private static final int REQ_LOC = 101;
+    private static final int REQ_CAL = 102;
     private WebView web;
     private final Handler main = new Handler(Looper.getMainLooper());
 
@@ -50,6 +51,29 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String getCachedWeather() { return cachedPayload(); }
+
+        @JavascriptInterface
+        public boolean hasCalendar() { return CalendarEvents.hasPermission(MainActivity.this); }
+
+        @JavascriptInterface
+        public void requestCalendar() {
+            main.post(() -> requestPermissions(new String[]{Manifest.permission.READ_CALENDAR}, REQ_CAL));
+        }
+
+        /** Sự kiện lịch máy + ngày lễ VN + mùng 1/rằm trong {@code days} ngày tới. */
+        @JavascriptInterface
+        public String getEvents(int days) {
+            JSONArray a = new JSONArray();
+            try {
+                for (CalendarEvents.Ev e : CalendarEvents.upcoming(MainActivity.this, days)) {
+                    java.util.Calendar t = java.util.Calendar.getInstance();
+                    t.setTimeInMillis(e.start);
+                    a.put(new JSONObject().put("y", e.y).put("m", e.m).put("d", e.d).put("title", e.title).put("kind", e.kind)
+                            .put("time", e.allDay ? "" : WidgetRenderer.two(t.get(java.util.Calendar.HOUR_OF_DAY)) + ":" + WidgetRenderer.two(t.get(java.util.Calendar.MINUTE))));
+                }
+            } catch (Exception ignored) {}
+            return a.toString();
+        }
 
         @JavascriptInterface
         public boolean isDark() { return WidgetRenderer.isNight(MainActivity.this); }
@@ -163,6 +187,14 @@ public class MainActivity extends Activity {
             return;
         }
         fetchLocation();
+        maybeAskCalendar();
+    }
+
+    /** Hỏi quyền đọc lịch máy một lần (để widget hiện sự kiện & ngày lễ chính thức). */
+    private void maybeAskCalendar() {
+        if (CalendarEvents.hasPermission(this) || Weather.prefs(this).getBoolean("askedCal", false)) return;
+        Weather.prefs(this).edit().putBoolean("askedCal", true).apply();
+        main.postDelayed(() -> requestPermissions(new String[]{Manifest.permission.READ_CALENDAR}, REQ_CAL), 600);
     }
 
     @Override
@@ -171,6 +203,10 @@ public class MainActivity extends Activity {
         if (requestCode == REQ_LOC) {
             if (hasLocPermission()) fetchLocation();
             else sendError();
+            maybeAskCalendar();
+        } else if (requestCode == REQ_CAL) {
+            WidgetRenderer.updateAll(this);
+            web.evaluateJavascript("window.onCalendarChanged && window.onCalendarChanged()", null);
         }
     }
 

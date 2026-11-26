@@ -137,7 +137,23 @@
     $("selAge").innerHTML = '<div class="age"><div class="av">' + t.chiName + '</div><div class="m"><div class="s">Với tuổi ' + t.canChi + " · " + r.than +
       " · trực " + r.truc + "</div><b>" + r.muc + "</b> " + dots(r.diem) + '<div class="s">Giờ tốt: ' + r.gioTot.map(function (g) { return g.split(" ")[0]; }).join(", ") + "</div></div></div>";
   }
+  function deviceEvents() {
+    try { return NB && NB.getEvents ? JSON.parse(NB.getEvents(60)) : null; } catch (e) { return null; }
+  }
+  window.onCalendarChanged = function () { renderCal(); if ($("tab-set").classList.contains("active")) renderSettings(); };
   function renderEvents() {
+    var dev = deviceEvents();
+    if (dev) {
+      var t0 = new Date(), html = dev.slice(0, 5).map(function (e) {
+        var dt = new Date(e.y, e.m - 1, e.d), today = e.y === t0.getFullYear() && e.m === t0.getMonth() + 1 && e.d === t0.getDate();
+        var col = e.kind === 1 ? "var(--red)" : e.kind === 2 ? "var(--orange)" : "var(--acc)";
+        return '<div class="ev"><span><i style="display:inline-block;width:7px;height:7px;border-radius:4px;background:' + col + ';margin-right:8px"></i>' +
+          (e.kind === 1 ? '<span class="hol" style="color:var(--red)!important">' + esc(e.title) + "</span>" : esc(e.title)) + "</span><b>" +
+          (today ? "Hôm nay" : THU_N[dt.getDay()] + " · " + pad(e.d) + "/" + pad(e.m)) + (e.time ? " " + e.time : "") + "</b></div>";
+      }).join("");
+      $("events").innerHTML = html || '<div class="muted">Không có sự kiện.</div>';
+      return;
+    }
     var out = [], t = new Date(); t.setHours(0, 0, 0, 0);
     for (var k = 1; k <= 120 && out.length < 4; k++) {
       var dt = new Date(t.getTime() + k * 864e5), d = dt.getDate(), m = dt.getMonth() + 1, y = dt.getFullYear();
@@ -294,7 +310,7 @@
     { id: "clock", name: "Đồng hồ & Lịch", size: "4×2" }, { id: "date", name: "Ngày · Tuần · Âm lịch", size: "4×2" },
     { id: "weather", name: "Thời tiết theo giờ", size: "4×3" }, { id: "weather2", name: "Thời tiết", size: "2×2" },
     { id: "calendar3", name: "Lịch ngày đầy đủ", size: "3×2" }, { id: "calendar", name: "Lịch ngày", size: "2×2" },
-    { id: "compact", name: "Thanh gọn", size: "4×1" }
+    { id: "compact", name: "Thanh gọn", size: "4×1" }, { id: "summary", name: "Tổng hợp", size: "5×3" }
   ];
   function renderBirthInfo() {
     var t = tuoiInfo();
@@ -306,6 +322,10 @@
   });
   function renderSettings() {
     $("birth").value = getBirth(); renderBirthInfo();
+    var hasCal = false; try { hasCal = NB ? NB.hasCalendar() : false; } catch (e) {}
+    $("calPerm").innerHTML = hasCal ? '<div class="muted">Đã kết nối – sự kiện và ngày lễ từ lịch của máy hiện trên app và widget.</div>'
+      : '<div class="muted" style="margin-bottom:10px">Cho phép đọc lịch của máy để hiện lịch hẹn và ngày lễ chính thức (bật lịch “Ngày lễ ở Việt Nam” trong Google Calendar).</div><button class="small" id="btnCal">Cho phép đọc lịch</button>';
+    if (!hasCal && $("btnCal")) $("btnCal").onclick = function () { if (NB) NB.requestCalendar(); };
     var cm = currentModel();
     $("models").innerHTML = WX.MODELS.map(function (m) {
       return '<label class="opt"><input type="radio" name="model" value="' + m.id + '"' + (m.id === cm ? " checked" : "") + "><span><b>" + m.name + "</b><small>" + m.note + "</small></span></label>";

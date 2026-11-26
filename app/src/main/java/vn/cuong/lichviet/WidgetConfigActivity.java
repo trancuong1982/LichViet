@@ -55,6 +55,21 @@ public class WidgetConfigActivity extends Activity {
 
         @JavascriptInterface public String getBirth() { return Weather.birth(WidgetConfigActivity.this); }
 
+        @JavascriptInterface public boolean isWallLight() { return Summary.wallpaperLight(WidgetConfigActivity.this); }
+
+        @JavascriptInterface public String getEvents(int days) {
+            org.json.JSONArray a = new org.json.JSONArray();
+            try {
+                for (CalendarEvents.Ev e : CalendarEvents.upcoming(WidgetConfigActivity.this, days)) {
+                    java.util.Calendar t = java.util.Calendar.getInstance();
+                    t.setTimeInMillis(e.start);
+                    a.put(new JSONObject().put("y", e.y).put("m", e.m).put("d", e.d).put("title", e.title).put("kind", e.kind)
+                            .put("time", e.allDay ? "" : WidgetRenderer.two(t.get(java.util.Calendar.HOUR_OF_DAY)) + ":" + WidgetRenderer.two(t.get(java.util.Calendar.MINUTE))));
+                }
+            } catch (Exception ignored) {}
+            return a.toString();
+        }
+
         @JavascriptInterface public String getConfig() { return WidgetRenderer.cfgJson(WidgetConfigActivity.this, widgetId); }
 
         @JavascriptInterface public String getWeather() {

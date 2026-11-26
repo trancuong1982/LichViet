@@ -14,4 +14,6 @@
     <string name="wdesc_weather2">Thời tiết hiện tại, cao/thấp, dự báo mưa</string>
     <string name="wname_calendar3">Lịch ngày 3×2</string>
     <string name="wdesc_calendar3">Ngày dương – âm, tuần, Can Chi, ngày lễ, tốt xấu theo tuổi</string>
+    <string name="wname_summary">Tổng hợp 5×3</string>
+    <string name="wdesc_summary">Lời chào, thời tiết, ngày 3D, lịch tháng, sự kiện &amp; ngày lễ, tốt xấu theo tuổi</string>
 </resources>

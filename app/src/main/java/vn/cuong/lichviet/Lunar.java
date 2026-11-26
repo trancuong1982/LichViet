@@ -134,8 +134,15 @@ public final class Lunar {
     public static int namAmTuoi(int dd, int mm, int yy) { return fromSolar(dd, mm, yy).year; }
     public static String menh(int lunarYear) { return NAP_AM[((((lunarYear - 4) % 60) + 60) % 60) / 2]; }
 
+    static final String[] TRUC_MOTA = {"hợp xuất hành, gặp gỡ", "hợp dọn dẹp, chữa bệnh", "hợp cầu tài, mở hàng",
+            "bình thường, việc nhỏ", "hợp ký kết, giao dịch", "hợp ký kết, xây dựng", "kỵ việc lớn", "nên thận trọng",
+            "hợp khai trương, cưới hỏi", "hợp thu hoạch, thu nợ", "hợp khai trương, cầu tài", "kỵ khởi công"};
+
     public static final class DanhGia {
         public int diem; public String muc; public boolean hoangDao, xung; public String than, truc;
+        /** 0 = bình hòa, 1 = lục hợp, 2 = tam hợp, -1 = xung, -2 = không xét tuổi */
+        public int quanHe = -2;
+        public int trucDiem; public String trucMoTa;
     }
 
     /** chiTuoi < 0: không xét tuổi. */
@@ -145,12 +152,14 @@ public final class Lunar {
         int ti = (dchi - thanStart(mchi) + 12) % 12, tr = (dchi - tietMonthChi(jd) + 12) % 12;
         DanhGia r = new DanhGia();
         r.than = THAN[ti]; r.hoangDao = THAN_TOT[ti]; r.truc = TRUC[tr];
+        r.trucDiem = TRUC_DIEM[tr]; r.trucMoTa = TRUC_MOTA[tr];
         int s = 3 + (r.hoangDao ? 1 : -1) + TRUC_DIEM[tr];
         if (chiTuoi >= 0) {
             int diff = (dchi - chiTuoi + 12) % 12;
-            if (diff == 6) { s -= 2; r.xung = true; }
-            else if ((dchi + chiTuoi) % 12 == 1) s += 1;
-            else if (dchi % 4 == chiTuoi % 4 && dchi != chiTuoi) s += 1;
+            r.quanHe = 0;
+            if (diff == 6) { s -= 2; r.xung = true; r.quanHe = -1; }
+            else if ((dchi + chiTuoi) % 12 == 1) { s += 1; r.quanHe = 1; }
+            else if (dchi % 4 == chiTuoi % 4 && dchi != chiTuoi) { s += 1; r.quanHe = 2; }
         }
         if (r.xung) s = Math.min(s, 2);
         r.diem = Math.max(1, Math.min(5, s));
@@ -190,17 +199,24 @@ public final class Lunar {
     static final java.util.Map<String, String> LE_DUONG = new java.util.HashMap<>();
     static final java.util.Map<String, String> LE_AM = new java.util.HashMap<>();
     static {
-        String[] dg = {"1/1", "Tết Dương lịch", "3/2", "Thành lập Đảng", "14/2", "Lễ Tình nhân", "27/2", "Thầy thuốc VN",
+        String[] dg = {"1/1", "Tết Dương lịch", "9/1", "Ngày HS-SV VN", "3/2", "Thành lập Đảng", "14/2", "Lễ Tình nhân", "27/2", "Thầy thuốc VN",
                 "8/3", "Quốc tế Phụ nữ", "26/3", "Thành lập Đoàn", "30/4", "Giải phóng miền Nam", "1/5", "Quốc tế Lao động",
                 "19/5", "Sinh nhật Bác Hồ", "1/6", "Quốc tế Thiếu nhi", "28/6", "Gia đình VN", "27/7", "Thương binh Liệt sĩ",
                 "19/8", "Cách mạng tháng Tám", "2/9", "Quốc khánh", "13/10", "Doanh nhân VN", "20/10", "Phụ nữ VN",
-                "20/11", "Nhà giáo VN", "22/12", "Thành lập QĐND", "24/12", "Giáng sinh"};
+                "20/11", "Nhà giáo VN", "22/12", "Thành lập QĐND VN", "24/12", "Lễ Giáng sinh"};
         String[] am = {"1/1", "Tết Nguyên đán", "2/1", "Tết Nguyên đán", "3/1", "Tết Nguyên đán", "15/1", "Tết Nguyên tiêu",
                 "3/3", "Tết Hàn thực", "10/3", "Giỗ Tổ Hùng Vương", "15/4", "Lễ Phật đản", "5/5", "Tết Đoan ngọ",
                 "7/7", "Thất tịch", "15/7", "Lễ Vu Lan", "15/8", "Tết Trung thu", "9/9", "Tết Trùng cửu",
                 "15/10", "Tết Hạ nguyên", "23/12", "Ông Táo chầu trời"};
         for (int i = 0; i < dg.length; i += 2) LE_DUONG.put(dg[i], dg[i + 1]);
         for (int i = 0; i < am.length; i += 2) LE_AM.put(am[i], am[i + 1]);
+    }
+
+    /** Tên ngày lễ chính thức (dương hoặc âm), không tính mùng 1/rằm. */
+    public static String ngayLe(int dd, int mm, Date L) {
+        String s = LE_DUONG.get(dd + "/" + mm);
+        if (s != null) return s;
+        return L.leap ? null : LE_AM.get(L.day + "/" + L.month);
     }
 
     /** Ngày lễ / mùng 1 / rằm của ngày (null nếu không có). */
