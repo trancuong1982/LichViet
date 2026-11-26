@@ -237,7 +237,7 @@ public final class Summary {
         String time = e.allDay ? "" : " " + WidgetRenderer.two(t.get(Calendar.HOUR_OF_DAY)) + ":" + WidgetRenderer.two(t.get(Calendar.MINUTE));
         if (sameDay(t, now)) return "Nay" + time;
         if (sameDay(t, tm)) return "Mai" + time;
-        return WidgetRenderer.THU_NGAN[t.get(Calendar.DAY_OF_WEEK) - 1] + " " + WidgetRenderer.two(e.d) + "/" + WidgetRenderer.two(e.m);
+        return WidgetRenderer.two(e.d) + "/" + WidgetRenderer.two(e.m);
     }
     static boolean sameDay(Calendar a, Calendar b) {
         return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) && a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR);

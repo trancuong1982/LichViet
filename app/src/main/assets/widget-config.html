@@ -192,7 +192,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var evs = EVENTS || builtinEvents();
     var ev = evs.slice(0, 5).map(function (e) {
       var dt = new Date(e.y, e.m - 1, e.d), td = e.y === y && e.m === m && e.d === d, c2 = e.kind === 1 ? P.red : e.kind === 2 ? P.orange : P.acc;
-      return '<div style="display:flex;gap:4px;font-size:10px;line-height:15px;white-space:nowrap"><b style="width:62px;flex:none;color:' + P.fg2 + '"><span style="color:' + c2 + '">●</span> ' + (td ? "Nay" : THU_N[dt.getDay()] + " " + pad(e.d) + "/" + pad(e.m)) + (e.time ? " " + e.time : "") +
+      return '<div style="display:flex;gap:4px;font-size:10px;line-height:15px;white-space:nowrap"><b style="width:54px;flex:none;color:' + P.fg2 + '"><span style="color:' + c2 + '">●</span> ' + (td ? "Nay" + (e.time ? " " + e.time : "") : pad(e.d) + "/" + pad(e.m)) +
         '</b><span class="ell" style="font-weight:600;color:' + (e.kind === 1 ? P.red : P.fg) + '">' + e.title + "</span></div>";
     }).join("");
     // tuổi
