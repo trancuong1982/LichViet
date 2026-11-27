@@ -26,6 +26,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private static final int REQ_LOC = 101;
     private static final int REQ_CAL = 102;
+    private static final int REQ_BG = 103;
     private WebView web;
     private final Handler main = new Handler(Looper.getMainLooper());
 
@@ -51,6 +52,18 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String getCachedWeather() { return cachedPayload(); }
+
+        @JavascriptInterface
+        public boolean hasBgLocation() {
+            return android.os.Build.VERSION.SDK_INT < 29
+                    || checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        @JavascriptInterface
+        public void requestBgLocation() {
+            if (android.os.Build.VERSION.SDK_INT < 29) return;
+            main.post(() -> requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, REQ_BG));
+        }
 
         @JavascriptInterface
         public boolean hasCalendar() { return CalendarEvents.hasPermission(MainActivity.this); }
@@ -204,54 +217,62 @@ public class MainActivity extends Activity {
             if (hasLocPermission()) fetchLocation();
             else sendError();
             maybeAskCalendar();
+        } else if (requestCode == REQ_BG) {
+            web.evaluateJavascript("window.onCalendarChanged && window.onCalendarChanged()", null);
         } else if (requestCode == REQ_CAL) {
             WidgetRenderer.updateAll(this);
             web.evaluateJavascript("window.onCalendarChanged && window.onCalendarChanged()", null);
         }
     }
 
+    /** Lấy vị trí chính xác: ưu tiên GPS, đồng thời mạng; nhận điểm đủ chính xác (≤ 60 m) hoặc tốt nhất sau 15 giây. */
     @SuppressWarnings({"MissingPermission", "deprecation"})
     private void fetchLocation() {
         try {
             final LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-            Location best = null;
+            Location last = null;
             for (String p : lm.getProviders(true)) {
                 Location l = lm.getLastKnownLocation(p);
-                if (l != null && (best == null || l.getTime() > best.getTime())) best = l;
+                if (l != null && (last == null || l.getTime() > last.getTime())) last = l;
             }
-            // Vị trí gần đây (< 15 phút) thì dùng luôn
-            if (best != null && System.currentTimeMillis() - best.getTime() < 15 * 60 * 1000) {
-                sendLocation(best);
+            // Vị trí rất mới (< 3 phút) và chính xác thì dùng luôn
+            if (last != null && System.currentTimeMillis() - last.getTime() < 3 * 60 * 1000 && last.getAccuracy() <= 100) {
+                sendLocation(last);
                 return;
             }
-            final Location fallback = best;
-            String provider = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-                    ? LocationManager.NETWORK_PROVIDER
-                    : (lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ? LocationManager.GPS_PROVIDER : null);
-            if (provider == null) {
+            final Location fallback = last;
+            final java.util.List<String> providers = new java.util.ArrayList<>();
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) providers.add(LocationManager.GPS_PROVIDER);
+            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) providers.add(LocationManager.NETWORK_PROVIDER);
+            if (providers.isEmpty()) {
                 if (fallback != null) sendLocation(fallback); else sendError();
                 return;
             }
             final boolean[] done = {false};
+            final Location[] best = {null};
             final LocationListener listener = new LocationListener() {
                 @Override public void onLocationChanged(Location location) {
                     if (done[0]) return;
-                    done[0] = true;
-                    lm.removeUpdates(this);
-                    sendLocation(location);
+                    if (best[0] == null || location.getAccuracy() < best[0].getAccuracy()) best[0] = location;
+                    if (location.getAccuracy() <= 60) {
+                        done[0] = true;
+                        lm.removeUpdates(this);
+                        sendLocation(location);
+                    }
                 }
                 @Override public void onStatusChanged(String p, int s, Bundle b) {}
                 @Override public void onProviderEnabled(String p) {}
                 @Override public void onProviderDisabled(String p) {}
             };
-            lm.requestLocationUpdates(provider, 0, 0, listener, Looper.getMainLooper());
-            // Hết 20 giây chưa có thì dùng vị trí cũ
+            for (String p : providers) lm.requestLocationUpdates(p, 0, 0, listener, Looper.getMainLooper());
             main.postDelayed(() -> {
                 if (done[0]) return;
                 done[0] = true;
                 lm.removeUpdates(listener);
-                if (fallback != null) sendLocation(fallback); else sendError();
-            }, 20000);
+                if (best[0] != null) sendLocation(best[0]);
+                else if (fallback != null) sendLocation(fallback);
+                else sendError();
+            }, 15000);
         } catch (Exception e) {
             sendError();
         }
@@ -259,6 +280,7 @@ public class MainActivity extends Activity {
 
     private void sendLocation(Location l) {
         Weather.saveLocation(this, l.getLatitude(), l.getLongitude());
+        Weather.prefs(this).edit().putLong("loc_ts", l.getTime()).apply();
         refreshInBackground();
     }
 

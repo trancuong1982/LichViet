@@ -82,7 +82,7 @@ public final class Summary {
     /* ---------------- Vẽ widget ---------------- */
     static void render(Context c, AppWidgetManager m, int id, WidgetRenderer.Cfg f) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_summary);
-        boolean glass = !"clear".equals(f.style);
+        boolean glass = "glass".equals(f.style), solid = "solid".equals(f.style);
         boolean light = "light".equals(f.tone) || ("auto".equals(f.tone) && wallpaperLight(c));
         P p = palette(light);
         float dens = c.getResources().getDisplayMetrics().density;
@@ -96,6 +96,13 @@ public final class Summary {
             v.setInt(R.id.bg, "setImageAlpha", light ? 140 : 105);
             v.setImageViewBitmap(R.id.gloss, gloss(light));
             v.setInt(R.id.rim, "setImageAlpha", light ? 230 : 95);
+        } else if (solid) {
+            // Nền đặc, chỉnh được độ trong suốt
+            v.setViewVisibility(R.id.bg, View.VISIBLE);
+            v.setViewVisibility(R.id.gloss, View.GONE);
+            v.setViewVisibility(R.id.rim, View.GONE);
+            v.setInt(R.id.bg, "setColorFilter", light ? 0xFFF6F8FD : 0xFF1C212B);
+            v.setInt(R.id.bg, "setImageAlpha", Math.round(f.opacity * 2.55f));
         } else {
             v.setViewVisibility(R.id.bg, View.GONE);
             v.setViewVisibility(R.id.gloss, View.GONE);
@@ -159,8 +166,11 @@ public final class Summary {
         v.setTextColor(R.id.d_sub, p.fg);
 
         // ----- Sự kiện -----
-        List<CalendarEvents.Ev> evs = CalendarEvents.upcoming(c, 60);
-        Set<Integer> personal = CalendarEvents.personalDays(evs);
+        List<CalendarEvents.Ev> all = CalendarEvents.upcoming(c, 90);
+        Set<Integer> personal = CalendarEvents.personalDays(all);
+        // Danh sách sự kiện: chỉ lịch hẹn và ngày lễ chính thức (không hiện mùng 1, rằm)
+        List<CalendarEvents.Ev> evs = new java.util.ArrayList<>();
+        for (CalendarEvents.Ev e : all) if (e.kind != CalendarEvents.LUNAR) evs.add(e);
         v.setImageViewBitmap(R.id.cal, drawMonth(y, mo, d, personal, p, dens));
         v.setTextColor(R.id.ev_head, p.fg2);
         boolean perm = CalendarEvents.hasPermission(c);

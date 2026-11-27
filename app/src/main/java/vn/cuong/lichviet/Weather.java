@@ -70,7 +70,7 @@ public final class Weather {
             if (!j.has("current")) return false;
             String place = p.getString("place", "");
             String placeKey = p.getString("place_key", "");
-            String key = String.format(Locale.US, "%.2f,%.2f", Double.parseDouble(lat), Double.parseDouble(lon));
+            String key = String.format(Locale.US, "%.3f,%.3f", Double.parseDouble(lat), Double.parseDouble(lon));
             if (place.isEmpty() || !key.equals(placeKey)) {
                 String np = reverseGeocode(c, Double.parseDouble(lat), Double.parseDouble(lon));
                 if (np != null && !np.isEmpty()) { place = np; placeKey = key; }
@@ -101,25 +101,80 @@ public final class Weather {
         }
     }
 
+    static final String[] WARD = {"Phường ", "Xã ", "Thị trấn ", "Đặc khu "};
+    static final String[] DIST = {"Quận ", "Huyện ", "Thị xã ", "Thành phố "};
+
+    static String startsWithAny(String s, String[] pre) {
+        if (s == null) return null;
+        s = s.trim();
+        for (String p : pre) if (s.startsWith(p)) return s;
+        return null;
+    }
+
+    /** Tên địa điểm chi tiết: "Phường …, Quận …, Tỉnh/TP …". */
     @SuppressWarnings("deprecation")
     static String reverseGeocode(Context c, double lat, double lon) {
+        // 1) Bộ chuyển đổi địa chỉ của máy
         try {
             if (Geocoder.isPresent()) {
-                List<Address> list = new Geocoder(c, new Locale("vi", "VN")).getFromLocation(lat, lon, 1);
-                if (list != null && !list.isEmpty()) {
-                    Address a = list.get(0);
-                    String l1 = firstNonEmpty(a.getSubLocality(), a.getLocality(), a.getSubAdminArea());
-                    String l2 = a.getAdminArea();
-                    String s = join(l1, l2);
-                    if (!s.isEmpty()) return s;
+                List<Address> list = new Geocoder(c, new Locale("vi", "VN")).getFromLocation(lat, lon, 3);
+                if (list != null) {
+                    for (Address a : list) {
+                        String ward = startsWithAny(a.getSubLocality(), WARD), dist = startsWithAny(a.getSubAdminArea(), DIST);
+                        String prov = a.getAdminArea();
+                        String line = a.getMaxAddressLineIndex() >= 0 ? a.getAddressLine(0) : null;
+                        if (line != null) {
+                            for (String part : line.split(",")) {
+                                String x = part.trim();
+                                if (ward == null) ward = startsWithAny(x, WARD);
+                                if (dist == null && !x.equals(prov)) dist = startsWithAny(x, DIST);
+                            }
+                        }
+                        if (ward != null) return join(join(ward, dist), prov);
+                    }
                 }
             }
         } catch (Exception ignored) {}
+        // 2) OpenStreetMap (Nominatim) – thường có phường/xã
+        try {
+            JSONObject g = new JSONObject(httpGet("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&accept-language=vi&lat="
+                    + lat + "&lon=" + lon));
+            JSONObject ad = g.optJSONObject("address");
+            if (ad != null) {
+                String ward = firstNonEmpty(ad.optString("quarter"), ad.optString("suburb"), ad.optString("village"), ad.optString("town"));
+                String dist = firstNonEmpty(ad.optString("city_district"), ad.optString("county"));
+                String prov = firstNonEmpty(ad.optString("city"), ad.optString("state"));
+                String s = join(join(ward, dist), prov);
+                if (ward != null && !s.isEmpty()) return s;
+            }
+        } catch (Exception ignored) {}
+        // 3) BigDataCloud
         try {
             JSONObject g = new JSONObject(httpGet("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="
                     + lat + "&longitude=" + lon + "&localityLanguage=vi"));
             return join(firstNonEmpty(g.optString("locality"), g.optString("city")), g.optString("principalSubdivision"));
         } catch (Exception e) { return null; }
+    }
+
+    /** Khi chạy nền: lấy vị trí mới nhất máy đã có (nếu được phép) để widget đúng nơi đang đứng. */
+    @SuppressWarnings("MissingPermission")
+    static void tryUpdateLocation(Context c) {
+        try {
+            if (c.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                    && c.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) return;
+            android.location.LocationManager lm = (android.location.LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
+            android.location.Location best = null;
+            for (String p : lm.getProviders(true)) {
+                android.location.Location l = lm.getLastKnownLocation(p);
+                if (l == null) continue;
+                if (best == null || l.getTime() > best.getTime() + 60_000 || (Math.abs(l.getTime() - best.getTime()) <= 60_000 && l.getAccuracy() < best.getAccuracy())) best = l;
+            }
+            long saved = prefs(c).getLong("loc_ts", 0);
+            if (best != null && best.getTime() > saved && best.getAccuracy() < 500) {
+                saveLocation(c, best.getLatitude(), best.getLongitude());
+                prefs(c).edit().putLong("loc_ts", best.getTime()).apply();
+            }
+        } catch (Exception ignored) {}
     }
 
     private static String firstNonEmpty(String... s) {

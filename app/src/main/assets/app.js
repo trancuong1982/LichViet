@@ -322,6 +322,10 @@
   });
   function renderSettings() {
     $("birth").value = getBirth(); renderBirthInfo();
+    var hasBg = true; try { hasBg = NB && NB.hasBgLocation ? NB.hasBgLocation() : true; } catch (e) {}
+    $("locPerm").innerHTML = hasBg ? '<div class="muted">Widget tự cập nhật đúng phường/xã nơi bạn đang ở, kể cả khi không mở app.</div>'
+      : '<div class="muted" style="margin-bottom:10px">Để widget tự đổi theo nơi bạn đang ở khi không mở app, chọn <b>“Luôn cho phép”</b> vị trí cho Lịch Việt.</div><button class="small" id="btnBg">Cho phép vị trí mọi lúc</button>';
+    if (!hasBg && $("btnBg")) $("btnBg").onclick = function () { NB.requestBgLocation(); };
     var hasCal = false; try { hasCal = NB ? NB.hasCalendar() : false; } catch (e) {}
     $("calPerm").innerHTML = hasCal ? '<div class="muted">Đã kết nối – sự kiện và ngày lễ từ lịch của máy hiện trên app và widget.</div>'
       : '<div class="muted" style="margin-bottom:10px">Cho phép đọc lịch của máy để hiện lịch hẹn và ngày lễ chính thức (bật lịch “Ngày lễ ở Việt Nam” trong Google Calendar).</div><button class="small" id="btnCal">Cho phép đọc lịch</button>';

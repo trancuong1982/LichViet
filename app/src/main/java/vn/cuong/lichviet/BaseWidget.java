@@ -56,6 +56,7 @@ public abstract class BaseWidget extends AppWidgetProvider {
         WidgetRenderer.updateAll(app);
         new Thread(() -> {
             try {
+                Weather.tryUpdateLocation(app);
                 Weather.refresh(app);
             } finally {
                 WidgetRenderer.refreshing = false;

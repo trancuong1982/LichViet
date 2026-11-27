@@ -268,13 +268,18 @@ public final class WidgetRenderer {
     }
     static String lunarDM(Lunar.Date L) { return L.day + "/" + L.month + (L.leap ? "N" : ""); }
     static String two(int n) { return n < 10 ? "0" + n : String.valueOf(n); }
+    /** Tên ngắn cho widget: "Phường Bến Nghé, Quận 1, …" → "Bến Nghé"; "Phường 5, Quận 3" → "P.5, Q.3". */
     static String shortPlace(String p) {
-        if (p == null) return "";
-        int i = p.indexOf(',');
-        String s = (i > 0 ? p.substring(0, i) : p).trim();
-        // Bỏ tiền tố hành chính cho gọn: "Thành phố Hồ Chí Minh" → "Hồ Chí Minh"; giữ dạng số: "Quận 1" → "Q.1"
+        if (p == null || p.trim().isEmpty()) return "";
+        String[] parts = p.split(",");
+        String first = shortOne(parts[0].trim());
+        if (!first.isEmpty() && Character.isDigit(first.charAt(first.length() - 1)) && parts.length > 1)
+            return first + ", " + shortOne(parts[1].trim());
+        return first;
+    }
+    static String shortOne(String s) {
         String[][] pre = {{"Thành phố ", "TP."}, {"TP. ", "TP."}, {"TP ", "TP."}, {"Tỉnh ", ""}, {"Phường ", "P."}, {"Quận ", "Q."},
-                {"Huyện ", "H."}, {"Thị xã ", "TX."}, {"Thị trấn ", "TT."}, {"Xã ", "X."}};
+                {"Huyện ", "H."}, {"Thị xã ", "TX."}, {"Thị trấn ", "TT."}, {"Xã ", "X."}, {"Đặc khu ", ""}};
         for (String[] x : pre) {
             if (s.startsWith(x[0])) {
                 String rest = s.substring(x[0].length()).trim();
