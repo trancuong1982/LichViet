@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Lớp cha cho các widget: vẽ lại, hẹn giờ 0h & chu kỳ cập nhật, nút làm mới thời tiết. */
 public abstract class BaseWidget extends AppWidgetProvider {
     public static final String ACTION_REFRESH = "vn.cuong.lichviet.REFRESH";
+    public static final String ACTION_NEXT_QUOTE = "vn.cuong.lichviet.NEXT_QUOTE";
     private static final AtomicBoolean busy = new AtomicBoolean(false);
 
     protected abstract String type();
@@ -39,6 +40,7 @@ public abstract class BaseWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context c, Intent i) {
         if (ACTION_REFRESH.equals(i.getAction())) refreshAsync(c, this);
+        else if (ACTION_NEXT_QUOTE.equals(i.getAction())) { Quotes.next(c); WidgetRenderer.updateAll(c); }
         else super.onReceive(c, i);
     }
 

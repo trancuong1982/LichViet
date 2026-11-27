@@ -86,7 +86,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
   var DARK = false; try { DARK = B.isDark(); } catch (e) {}
   document.body.classList.toggle("dark", DARK);
   var TYPE = B.getType();
-  var NAMES = { summary: "Tổng hợp 5×3", clock: "Đồng hồ & Lịch", date: "Ngày · Tuần · Âm lịch", weather: "Thời tiết", weather2: "Thời tiết 2×2", calendar: "Lịch ngày", calendar3: "Lịch ngày 3×2", compact: "Thanh gọn" };
+  var NAMES = { summary: "Tổng hợp 5×3", summaryq: "Tổng hợp + Châm ngôn 5×3", clock: "Đồng hồ & Lịch", date: "Ngày · Tuần · Âm lịch", weather: "Thời tiết", weather2: "Thời tiết 2×2", calendar: "Lịch ngày", calendar3: "Lịch ngày 3×2", compact: "Thanh gọn" };
   var THU = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], THU_N = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
   var THANG = ["", "Giêng", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Tám", "Chín", "Mười", "Một", "Chạp"];
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -103,8 +103,9 @@ input[type=range]{width:100%;accent-color:var(--tile)}
   if (TYPE === "date") { hide("tWeather"); hide("tPlace"); hide("tLunar"); }
   if (TYPE === "calendar" || TYPE === "calendar3" || TYPE === "compact") hide("tPlace");
   if (TYPE === "calendar3") hide("tLunar");
-  if (TYPE !== "date" && TYPE !== "calendar3" && TYPE !== "summary") hide("tTuoi");
-  if (TYPE === "summary") { hide("secBg"); hide("tLunar"); hide("tWeek"); $("secSum").classList.remove("hide"); }
+  if (TYPE !== "date" && TYPE !== "calendar3" && TYPE !== "summary" && TYPE !== "summaryq") hide("tTuoi");
+  var SUM = TYPE === "summary" || TYPE === "summaryq";
+  if (SUM) { hide("secBg"); hide("tLunar"); hide("tWeek"); $("secSum").classList.remove("hide"); }
 
   var ACC = { blue: ["#2D4BA0", "#B9C8FF"], green: ["#1F7A5C", "#7FD8B0"], orange: ["#C2620E", "#F4A65A"], purple: ["#6B4FBB", "#CDBDFF"], system: ["#3E5F90", "#A8C8FF"] };
   function pal() {
@@ -162,6 +163,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     for (var i = 0; i < pre.length; i++) if (x.indexOf(pre[i][0]) === 0) { var r = x.slice(pre[i][0].length).trim(); return /^\d/.test(r) ? pre[i][1] + r : r; }
     return x;
   }
+  var QUOTE = "Có công mài sắt, có ngày nên kim."; try { if (B.getQuote) QUOTE = B.getQuote(); } catch (e) {}
   var WALL_LIGHT = false; try { WALL_LIGHT = B.isWallLight ? B.isWallLight() : false; } catch (e) {}
   var EVENTS = null; try { EVENTS = B.getEvents ? JSON.parse(B.getEvents(60)) : null; } catch (e) {}
   function renderSummary() {
@@ -193,7 +195,8 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     cal += "</div>";
     // sự kiện
     var evs = (EVENTS || builtinEvents()).filter(function (e) { return e.kind !== 2; });
-    var ev = evs.slice(0, 5).map(function (e) {
+    var Q = TYPE === "summaryq";
+    var ev = evs.slice(0, Q ? 3 : 5).map(function (e) {
       var dt = new Date(e.y, e.m - 1, e.d), td = e.y === y && e.m === m && e.d === d, c2 = e.kind === 1 ? P.red : e.kind === 2 ? P.orange : P.acc;
       return '<div style="display:flex;gap:4px;font-size:10px;line-height:15px;white-space:nowrap"><b style="width:54px;flex:none;color:' + P.fg2 + '"><span style="color:' + c2 + '">●</span> ' + (td ? "Nay" + (e.time ? " " + e.time : "") : pad(e.d) + "/" + pad(e.m)) +
         '</b><span class="ell" style="font-weight:600;color:' + (e.kind === 1 ? P.red : P.fg) + '">' + e.title + "</span></div>";
@@ -202,8 +205,9 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var t = birth && cfg.tuoi ? Lunar.tuoi.apply(null, birth.split("-").map(Number).reverse()) : null, g = Lunar.danhGia(d, m, y, t ? t.chi : null);
     var mc = g.diem >= 4 ? P.good : g.diem === 3 ? P.mid : P.red, sym = function (ok) { return '<b style="color:' + (ok > 0 ? P.good : ok < 0 ? P.red : P.fg2) + '">' + (ok > 0 ? "✓" : ok < 0 ? "✕" : "–") + "</b> "; };
     var tu = t ? '<div style="display:flex;justify-content:space-between;font-size:9px;font-weight:800;letter-spacing:1px;color:' + P.fg2 + '"><span>TUỔI ' + t.canChi.toUpperCase() + '</span><span style="color:' + mc + '">' + "●●●●●".slice(0, g.diem) + '<span style="opacity:.3">' + "●●●●●".slice(g.diem) + "</span></span></div>" +
-      '<div style="font-size:16px;font-weight:800;color:' + mc + ';margin:3px 0">' + (g.diem === 3 ? "Bình thường" : "Ngày " + g.muc) + '</div><div style="font-size:10px;line-height:1.45">' +
-      g.lyDo.map(function (x) { return "<div class=\"ell\">" + sym(x.ok) + x.t + "</div>"; }).join("") + "</div>"
+      '<div style="font-size:' + (Q ? 13 : 16) + 'px;font-weight:800;color:' + mc + ';margin:3px 0">' + (g.diem === 3 ? "Bình thường" : "Ngày " + g.muc) + '</div><div style="font-size:10px;line-height:1.45">' +
+      (Q ? '<div class="ell">' + sym(g.hoangDao ? 1 : -1) + (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · " + sym(g.lyDo[1].ok) + "Trực " + g.truc + (g.xung ? " · " + sym(-1) + "Xung tuổi" : "") + "</div>"
+        : g.lyDo.map(function (x) { return "<div class=\"ell\">" + sym(x.ok) + x.t + "</div>"; }).join("")) + "</div>"
       : '<div style="font-size:9px;font-weight:800;color:' + P.fg2 + '">XEM NGÀY ' + Lunar.canChiDay(L.jd).toUpperCase() + '</div><div style="font-size:16px;font-weight:800;color:' + (g.hoangDao ? P.good : P.red) + '">' + (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + '</div><div style="font-size:10px">Nhập ngày sinh để xem theo tuổi</div>';
     tu += '<div class="ell" style="font-size:10px;color:' + P.fg2 + '">Giờ tốt: <b style="color:' + P.fg + '">' + (t ? g.gioTot : Lunar.gioHoangDao(L.jd)).slice(0, 4).map(function (x) { return x.split(" ")[0]; }).join(", ") + "</b></div>";
     var wx = cfg.weather ? '<div style="flex:0 0 112px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px">' +
@@ -213,10 +217,11 @@ input[type=range]{width:100%;accent-color:var(--tile)}
       '<div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cfg.place && data && data.place ? shortPlace(data.place) : pad(now.getHours()) + ":" + pad(now.getMinutes())) + " ⟳</div>" +
       '<div class="ell" style="font-size:10px;font-weight:700">' + (w ? WX.rainHint(w).replace("Có thể mưa trong giờ này", "Mưa giờ này").replace("Có thể mưa khoảng ", "Mưa ~").replace("Có dông khoảng ", "Dông ~").replace("Không mưa trong 12 giờ tới", "Không mưa 12h tới").replace("Đang mưa · tạnh khoảng ", "Đang mưa · tạnh ~").replace(" (", " · ").replace("%)", "%") : "") + "</div></div>" : "";
     $("content").innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><b style="font-size:13px">' + greet + '</b><b style="font-size:11px;letter-spacing:1px">T' + m + "/" + y + "</b></div>" +
-      '<div style="display:flex;gap:6px;height:136px">' + wx + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">' + three +
+      '<div style="display:flex;gap:6px;height:' + (Q ? 120 : 136) + 'px">' + wx + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">' + three +
       '<div style="font-size:13px;font-weight:800;color:' + (red ? P.red : P.fg) + '">' + THU[wd] + '</div><div style="font-size:10px;font-weight:700">W' + Lunar.isoWeek(d, m, y) + " · ÂL " + L.day + "/" + L.month + '</div></div><div style="flex:0 0 152px;display:flex;align-items:center">' + cal + "</div></div>" +
       '<div style="height:1px;background:' + P.fg + ';opacity:.25;margin:8px 0 6px"></div><div style="display:flex;gap:12px"><div style="flex:1.15;min-width:0"><div style="font-size:9px;font-weight:800;letter-spacing:1px;color:' + P.fg2 + '">SỰ KIỆN &amp; NGÀY LỄ</div>' + ev +
-      '</div><div style="flex:1;min-width:0">' + tu + "</div></div>";
+      '</div><div style="flex:1;min-width:0">' + tu + "</div></div>" +
+      (Q ? '<div style="display:flex;gap:8px;align-items:center;margin-top:6px;border-radius:12px;padding:6px 10px;background:' + (light ? "rgba(45,75,160,.09)" : "rgba(255,255,255,.12)") + '"><b style="font-size:20px;line-height:1;color:' + (light ? "#2D4BA0" : "#FFE29A") + '">“</b><div style="font-size:11px;font-weight:700;font-style:italic;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + QUOTE + "</div></div>" : "");
   }
   var LE = { "1/1": "Tết Dương lịch", "3/2": "Thành lập Đảng", "30/4": "Giải phóng miền Nam", "1/5": "Quốc tế Lao động", "2/9": "Quốc khánh", "20/10": "Phụ nữ VN", "20/11": "Nhà giáo VN", "22/12": "Thành lập QĐND VN", "24/12": "Lễ Giáng sinh", "8/3": "Quốc tế Phụ nữ", "19/5": "Sinh nhật Bác Hồ", "1/6": "Quốc tế Thiếu nhi", "27/7": "Thương binh Liệt sĩ", "19/8": "Cách mạng tháng Tám", "14/2": "Lễ Tình nhân", "9/1": "Ngày HS-SV VN", "27/2": "Thầy thuốc VN", "26/3": "Thành lập Đoàn", "28/6": "Gia đình VN", "13/10": "Doanh nhân VN" };
   var LEA = { "1/1": "Tết Nguyên đán", "2/1": "Tết Nguyên đán", "3/1": "Tết Nguyên đán", "15/1": "Tết Nguyên tiêu", "3/3": "Tết Hàn thực", "10/3": "Giỗ Tổ Hùng Vương", "15/4": "Lễ Phật đản", "5/5": "Tết Đoan ngọ", "7/7": "Thất tịch", "15/7": "Lễ Vu Lan", "15/8": "Tết Trung thu", "9/9": "Tết Trùng cửu", "15/10": "Tết Hạ nguyên", "23/12": "Ông Táo chầu trời" };
@@ -231,7 +236,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     return out;
   }
   function render() {
-    if (TYPE === "summary") { renderSummary(); return; }
+    if (TYPE === "summary" || TYPE === "summaryq") { renderSummary(); return; }
     $("wg").style.boxShadow = "none";
     var p = pal(), L = Lunar.solar2Lunar(d, m, y), wk = Lunar.isoWeek(d, m, y), w = data && data.w, cur = w && w.current;
     $("bgl").style.background = p.surface; $("bgl").style.opacity = cfg.opacity / 100;

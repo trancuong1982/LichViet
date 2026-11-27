@@ -55,6 +55,8 @@ public class WidgetConfigActivity extends Activity {
 
         @JavascriptInterface public String getBirth() { return Weather.birth(WidgetConfigActivity.this); }
 
+        @JavascriptInterface public String getQuote() { return Quotes.today(WidgetConfigActivity.this); }
+
         @JavascriptInterface public boolean isWallLight() { return Summary.wallpaperLight(WidgetConfigActivity.this); }
 
         @JavascriptInterface public String getEvents(int days) {

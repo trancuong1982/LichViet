@@ -27,7 +27,7 @@ public final class WidgetRenderer {
     @SuppressWarnings("unchecked")
     static final Class<? extends BaseWidget>[] PROVIDERS = new Class[]{
             ClockWidget.class, DateWidget.class, WeatherWidget.class, WeatherSmallWidget.class,
-            CalendarWidget.class, CalendarWideWidget.class, CompactWidget.class, SummaryWidget.class};
+            CalendarWidget.class, CalendarWideWidget.class, CompactWidget.class, SummaryWidget.class, SummaryQuoteWidget.class};
 
     /** Đang tải thời tiết (để hiện "Đang cập nhật…" trên widget). */
     static volatile boolean refreshing = false;
@@ -159,6 +159,7 @@ public final class WidgetRenderer {
         if (cls == WeatherSmallWidget.class) return "weather2";
         if (cls == CalendarWideWidget.class) return "calendar3";
         if (cls == SummaryWidget.class) return "summary";
+        if (cls == SummaryQuoteWidget.class) return "summaryq";
         return "clock";
     }
     public static Class<? extends BaseWidget> classOf(String type) {
@@ -170,6 +171,7 @@ public final class WidgetRenderer {
             case "weather2": return WeatherSmallWidget.class;
             case "calendar3": return CalendarWideWidget.class;
             case "summary": return SummaryWidget.class;
+            case "summaryq": return SummaryQuoteWidget.class;
             default: return ClockWidget.class;
         }
     }
@@ -196,7 +198,8 @@ public final class WidgetRenderer {
 
     public static void render(Context c, AppWidgetManager m, int id, String type) {
         Cfg f = Cfg.load(c, id);
-        if ("summary".equals(type)) { Summary.render(c, m, id, f); return; }
+        if ("summary".equals(type)) { Summary.render(c, m, id, f, false); return; }
+        if ("summaryq".equals(type)) { Summary.render(c, m, id, f, true); return; }
         RemoteViews v = new RemoteViews(c.getPackageName(), layoutOf(type));
         boolean auto = "auto".equals(f.theme);
         boolean useDark = "dark".equals(f.theme) || (auto && isNight(c));

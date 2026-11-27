@@ -80,8 +80,11 @@ public final class Summary {
             {R.id.ev0_d, R.id.ev0_t}, {R.id.ev1_d, R.id.ev1_t}, {R.id.ev2_d, R.id.ev2_t}, {R.id.ev3_d, R.id.ev3_t}, {R.id.ev4_d, R.id.ev4_t}};
 
     /* ---------------- Vẽ widget ---------------- */
-    static void render(Context c, AppWidgetManager m, int id, WidgetRenderer.Cfg f) {
-        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_summary);
+    static void render(Context c, AppWidgetManager m, int id, WidgetRenderer.Cfg f) { render(c, m, id, f, false); }
+
+    /** q = true: bản có châm ngôn (sự kiện & tuổi gọn lại). */
+    static void render(Context c, AppWidgetManager m, int id, WidgetRenderer.Cfg f, boolean q) {
+        RemoteViews v = new RemoteViews(c.getPackageName(), q ? R.layout.widget_summary_q : R.layout.widget_summary);
         boolean glass = "glass".equals(f.style), solid = "solid".equals(f.style);
         boolean light = "light".equals(f.tone) || ("auto".equals(f.tone) && wallpaperLight(c));
         P p = palette(light);
@@ -150,7 +153,7 @@ public final class Summary {
             v.setTextViewText(R.id.wx_hilo, "Mở app để lấy vị trí");
             v.setViewVisibility(R.id.rain_box, View.GONE);
         }
-        Intent r = new Intent(c, SummaryWidget.class).setAction(BaseWidget.ACTION_REFRESH);
+        Intent r = new Intent(c, q ? SummaryQuoteWidget.class : SummaryWidget.class).setAction(BaseWidget.ACTION_REFRESH);
         v.setOnClickPendingIntent(R.id.btn_refresh, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         v.setInt(R.id.rf_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
         v.setInt(R.id.rf_bg, "setImageAlpha", light ? 40 : 60);
@@ -174,8 +177,9 @@ public final class Summary {
         v.setImageViewBitmap(R.id.cal, drawMonth(y, mo, d, personal, p, dens));
         v.setTextColor(R.id.ev_head, p.fg2);
         boolean perm = CalendarEvents.hasPermission(c);
-        int rows = perm ? 5 : 4;
-        for (int i = 0; i < 5; i++) {
+        int maxRows = q ? 3 : 5;
+        int rows = perm ? maxRows : maxRows - 1;
+        for (int i = 0; i < maxRows; i++) {
             int[] ids = EV[i];
             if (i < rows && i < evs.size()) {
                 CalendarEvents.Ev e = evs.get(i);
@@ -204,7 +208,7 @@ public final class Summary {
         Lunar.DanhGia g = Lunar.danhGia(d, mo, y, ct);
         int mc = g.diem >= 4 ? p.good : (g.diem == 3 ? p.mid : p.red);
         v.setTextColor(R.id.t_head, p.fg2);
-        for (int t : new int[]{R.id.t_l1, R.id.t_l2, R.id.t_l3}) v.setTextColor(t, p.fg);
+        for (int t : q ? new int[]{R.id.t_l1} : new int[]{R.id.t_l1, R.id.t_l2, R.id.t_l3}) v.setTextColor(t, p.fg);
         if (ct >= 0) {
             int lunarYear = Lunar.namAmTuoi(birthD(c), birthM(c), birthY(c));
             v.setTextViewText(R.id.t_head, "TUỔI " + Lunar.canChiYear(lunarYear).toUpperCase());
@@ -213,20 +217,28 @@ public final class Summary {
             v.setTextViewText(R.id.t_dots, dots);
             v.setTextViewText(R.id.t_muc, g.diem == 3 ? "Bình thường" : "Ngày " + g.muc);
             v.setTextColor(R.id.t_muc, mc);
+            if (q) {
+                v.setTextViewText(R.id.t_l1, compactReasons(g, ct, p));
+            } else {
             v.setTextViewText(R.id.t_l1, reason(g.hoangDao ? 1 : -1, (g.hoangDao ? "Hoàng đạo · " : "Hắc đạo · ") + g.than, p));
             v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " · " + g.trucMoTa, p));
             String ten = Lunar.CHI[ct];
             String qh = g.quanHe == -1 ? "Xung tuổi " + ten : g.quanHe == 1 ? "Lục hợp tuổi " + ten : g.quanHe == 2 ? "Tam hợp tuổi " + ten : "Không xung tuổi";
             v.setTextViewText(R.id.t_l3, reason(g.quanHe == -1 ? -1 : g.quanHe > 0 ? 1 : 0, qh, p));
+            }
         } else {
             v.setTextViewText(R.id.t_head, "XEM NGÀY " + Lunar.canChiDay(L.jd).toUpperCase());
             v.setTextViewText(R.id.t_dots, "");
             v.setTextViewText(R.id.t_muc, g.hoangDao ? "Hoàng đạo" : "Hắc đạo");
             v.setTextColor(R.id.t_muc, g.hoangDao ? p.good : p.red);
-            v.setTextViewText(R.id.t_l1, reason(g.hoangDao ? 1 : -1, "Thần " + g.than, p));
-            v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " · " + g.trucMoTa, p));
-            v.setTextViewText(R.id.t_l3, "Nhập ngày sinh trong app");
-            v.setTextColor(R.id.t_l3, p.fg2);
+            if (q) {
+                v.setTextViewText(R.id.t_l1, compactReasons(g, -1, p));
+            } else {
+                v.setTextViewText(R.id.t_l1, reason(g.hoangDao ? 1 : -1, "Thần " + g.than, p));
+                v.setTextViewText(R.id.t_l2, reason(g.trucDiem, "Trực " + g.truc + " · " + g.trucMoTa, p));
+                v.setTextViewText(R.id.t_l3, "Nhập ngày sinh trong app");
+                v.setTextColor(R.id.t_l3, p.fg2);
+            }
         }
         SpannableStringBuilder gio = new SpannableStringBuilder();
         append(gio, "Giờ tốt: ", p.fg2, false);
@@ -234,6 +246,15 @@ public final class Summary {
         v.setTextViewText(R.id.t_gio, gio);
         v.setViewVisibility(R.id.tuoi_col, View.VISIBLE);
 
+        if (q) {
+            v.setTextViewText(R.id.quote, Quotes.today(c));
+            v.setTextColor(R.id.quote, p.fg);
+            v.setInt(R.id.quote_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
+            v.setInt(R.id.quote_bg, "setImageAlpha", light ? 22 : 30);
+            v.setInt(R.id.quote_icon, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFE29A);
+            Intent nq = new Intent(c, SummaryQuoteWidget.class).setAction(BaseWidget.ACTION_NEXT_QUOTE);
+            v.setOnClickPendingIntent(R.id.quote_box, PendingIntent.getBroadcast(c, 3000 + id, nq, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        }
         v.setInt(R.id.divider, "setColorFilter", p.fg);
         v.setInt(R.id.divider, "setImageAlpha", light ? 36 : 70);
         m.updateAppWidget(id, v);
@@ -251,6 +272,22 @@ public final class Summary {
     }
     static boolean sameDay(Calendar a, Calendar b) {
         return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) && a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR);
+    }
+
+    /** Một dòng gọn: "✕ Hắc đạo · ✕ Trực Phá · ✓ Hợp tuổi" */
+    static CharSequence compactReasons(Lunar.DanhGia g, int ct, P p) {
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        append(sb, g.hoangDao ? "✓ " : "✕ ", g.hoangDao ? p.good : p.red, true);
+        append(sb, g.hoangDao ? "Hoàng đạo" : "Hắc đạo", p.fg, false);
+        append(sb, " · ", p.fg2, false);
+        append(sb, g.trucDiem > 0 ? "✓ " : g.trucDiem < 0 ? "✕ " : "– ", g.trucDiem > 0 ? p.good : g.trucDiem < 0 ? p.red : p.fg2, true);
+        append(sb, "Trực " + g.truc, p.fg, false);
+        if (ct >= 0 && g.quanHe != 0) {
+            append(sb, " · ", p.fg2, false);
+            append(sb, g.quanHe < 0 ? "✕ " : "✓ ", g.quanHe < 0 ? p.red : p.good, true);
+            append(sb, g.quanHe < 0 ? "Xung tuổi" : "Hợp tuổi", p.fg, false);
+        }
+        return sb;
     }
 
     static CharSequence reason(int ok, String text, P p) {
