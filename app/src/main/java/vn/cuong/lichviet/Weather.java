@@ -158,21 +158,38 @@ public final class Weather {
 
     /** Khi chạy nền: lấy vị trí mới nhất máy đã có (nếu được phép) để widget đúng nơi đang đứng. */
     @SuppressWarnings("MissingPermission")
+    /** Lấy vị trí chính xác cho widget: ưu tiên định vị mới (GPS) ≤ 100 m, sau đó vị trí gần nhất ≤ 150 m. */
     static void tryUpdateLocation(Context c) {
         try {
-            if (c.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED
-                    && c.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) return;
+            boolean fine = c.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            if (!fine && c.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) return;
             android.location.LocationManager lm = (android.location.LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
             android.location.Location best = null;
+            // 1) vị trí gần nhất của các nguồn
             for (String p : lm.getProviders(true)) {
                 android.location.Location l = lm.getLastKnownLocation(p);
                 if (l == null) continue;
                 if (best == null || l.getTime() > best.getTime() + 60_000 || (Math.abs(l.getTime() - best.getTime()) <= 60_000 && l.getAccuracy() < best.getAccuracy())) best = l;
             }
+            boolean fresh = best != null && System.currentTimeMillis() - best.getTime() < 5 * 60_000 && best.getAccuracy() <= 100;
+            // 2) nếu chưa đủ mới/chính xác: xin định vị mới (Android 11+), chờ tối đa 8 giây
+            if (!fresh && android.os.Build.VERSION.SDK_INT >= 30) {
+                String prov = fine && lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ? android.location.LocationManager.GPS_PROVIDER
+                        : lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) ? android.location.LocationManager.NETWORK_PROVIDER : null;
+                if (prov != null) {
+                    final android.location.Location[] got = new android.location.Location[1];
+                    final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                    android.os.CancellationSignal cs = new android.os.CancellationSignal();
+                    lm.getCurrentLocation(prov, cs, java.util.concurrent.Executors.newSingleThreadExecutor(), l -> { got[0] = l; latch.countDown(); });
+                    if (!latch.await(8, java.util.concurrent.TimeUnit.SECONDS)) cs.cancel();
+                    android.location.Location l = got[0];
+                    if (l != null && (best == null || l.getAccuracy() <= Math.max(best.getAccuracy(), 100) || l.getTime() > best.getTime() + 5 * 60_000)) best = l;
+                }
+            }
             long saved = prefs(c).getLong("loc_ts", 0);
-            if (best != null && best.getTime() > saved && best.getAccuracy() < 500) {
+            if (best != null && best.getTime() > saved && best.getAccuracy() <= 150) {
                 saveLocation(c, best.getLatitude(), best.getLongitude());
-                prefs(c).edit().putLong("loc_ts", best.getTime()).apply();
+                prefs(c).edit().putLong("loc_ts", best.getTime()).putFloat("loc_acc", best.getAccuracy()).apply();
             }
         } catch (Exception ignored) {}
     }

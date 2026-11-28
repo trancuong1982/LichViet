@@ -121,7 +121,7 @@ public final class Summary {
         int d = now.get(Calendar.DAY_OF_MONTH), mo = now.get(Calendar.MONTH) + 1, y = now.get(Calendar.YEAR);
         int wd = now.get(Calendar.DAY_OF_WEEK) - 1;
         Lunar.Date L = Lunar.fromSolar(d, mo, y);
-        boolean redDay = wd == 0 || wd == 6 || Lunar.ngayLe(d, mo, L) != null;
+        int kind = WidgetRenderer.dayKind(d, mo, wd, L);
 
         // ----- Cột thời tiết -----
         JSONObject w = Weather.cached(c);
@@ -133,9 +133,9 @@ public final class Summary {
         v.setTextColor(R.id.wx_hilo, p.fg2);
         v.setTextColor(R.id.rain, p.fg);
         v.setViewVisibility(R.id.wx_col, f.weather ? View.VISIBLE : View.GONE);
-        String place = WidgetRenderer.shortPlace(Weather.place(c));
+        CharSequence place = WidgetRenderer.placeLabel(Weather.place(c), false, p.fg2);
         String upd = WidgetRenderer.updatedText(c);
-        v.setTextViewText(R.id.wx_place, f.place && !place.isEmpty() && !WidgetRenderer.refreshing ? place : upd);
+        v.setTextViewText(R.id.wx_place, f.place && place.length() > 0 && !WidgetRenderer.refreshing ? place : upd);
         if (w != null) {
             try {
                 JSONObject cur = w.getJSONObject("current"), dl = w.getJSONObject("daily");
@@ -164,9 +164,9 @@ public final class Summary {
         // ----- Cột ngày 3D -----
         v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
         v.setTextColor(R.id.d_month, p.fg);
-        v.setImageViewBitmap(R.id.big3d, draw3D(String.valueOf(d), redDay, p, dens));
+        v.setImageViewBitmap(R.id.big3d, draw3D(String.valueOf(d), kind, p, dens, 112, 84));
         v.setTextViewText(R.id.d_weekday, WidgetRenderer.THU[wd]);
-        v.setTextColor(R.id.d_weekday, redDay ? p.red : p.fg);
+        v.setTextColor(R.id.d_weekday, kind == 1 ? p.red : kind == 2 ? p.gold : p.fg);
         v.setTextViewText(R.id.d_sub, "W" + Lunar.isoWeek(d, mo, y) + " · ÂL " + WidgetRenderer.lunarDM(L));
         v.setTextColor(R.id.d_sub, p.fg);
 
@@ -185,7 +185,7 @@ public final class Summary {
             int[] ids = EV[i];
             if (i < rows && i < evs.size()) {
                 CalendarEvents.Ev e = evs.get(i);
-                int col = e.kind == CalendarEvents.HOLIDAY ? p.red : (e.kind == CalendarEvents.LUNAR ? p.orange : p.acc);
+                int col = e.kind == CalendarEvents.HOLIDAY ? p.red : (e.kind == CalendarEvents.LUNAR ? p.gold : p.acc);
                 SpannableStringBuilder sb = new SpannableStringBuilder();
                 append(sb, "● ", col, false);
                 append(sb, label(e, now), p.fg2, true);
@@ -400,13 +400,14 @@ public final class Summary {
             float cx = cw * col + cw / 2, cy = headH + rh * (i / 7) + rh / 2;
             pt.setTypeface(cur ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
             pt.setTextSize(12 * dens);
-            int color = (col >= 5 || hol) ? p.red : p.fg;
+            int kd = hol ? 1 : (L.day == 1 || L.day == 15) ? 2 : col >= 5 ? 1 : 0;
+            int color = kd == 1 ? p.red : kd == 2 ? p.gold : p.fg;
             if (cur && dd == today) {
                 Paint circ = new Paint(Paint.ANTI_ALIAS_FLAG);
-                circ.setColor((col >= 5 || hol) ? (p.darkText ? p.red : 0xFFFF5A4E) : p.todayBg);
+                circ.setColor(kd == 1 ? (p.darkText ? p.red : 0xFFFF5A4E) : kd == 2 ? 0xFFFFB020 : p.todayBg);
                 circ.setShadowLayer(3 * dens, 0, dens, 0x40000000);
                 cv.drawCircle(cx, cy, Math.min(cw, rh) / 2 - 0.5f * dens, circ);
-                color = (col >= 5 || hol) ? 0xFFFFFFFF : p.todayFg;
+                color = kd == 1 ? 0xFFFFFFFF : kd == 2 ? 0xFF3A2500 : p.todayFg;
             }
             pt.setColor(color);
             Paint.FontMetrics fm = pt.getFontMetrics();
@@ -415,7 +416,6 @@ public final class Summary {
                 int key = CalendarEvents.key(yy, mm, dd);
                 int dc = 0;
                 if (personal.contains(key)) dc = p.acc;
-                else if (!hol && (L.day == 1 || L.day == 15)) dc = p.orange;
                 if (dc != 0) {
                     dot.setColor(dc);
                     cv.drawCircle(cx, cy + 7.5f * dens, 1.7f * dens, dot);

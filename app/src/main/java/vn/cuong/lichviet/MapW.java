@@ -199,7 +199,7 @@ public final class MapW {
         // ----- Ngày 3D + nhắc nhở -----
         String le = Lunar.ngayLe(d, mo, L);
         boolean lunarMark = L.day == 1 || L.day == 15;
-        int kind = le != null ? 1 : lunarMark ? 2 : (wd == 0 || wd == 6) ? 1 : 0;
+        int kind = WidgetRenderer.dayKind(d, mo, wd, L);
         int kc = kind == 1 ? p.red : kind == 2 ? p.gold : p.fg;
         v.setImageViewBitmap(R.id.big3d, Summary.draw3D(String.valueOf(d), kind, p, dens, 120, 92));
         v.setTextViewText(R.id.d_weekday, WidgetRenderer.THU[wd]);
@@ -288,7 +288,8 @@ public final class MapW {
             lon = Double.parseDouble(Weather.prefs(c).getString("lon", "0"));
         } catch (Exception e) { hasLoc = false; }
         v.setImageViewBitmap(R.id.map, drawMap(c, p, dens, lat, lon, hasLoc));
-        String[] pl = placeParts(Weather.place(c));
+        String[] pl = {WidgetRenderer.shortPlace(Weather.place(c)), WidgetRenderer.province(Weather.place(c))};
+        if (pl[1].equals(pl[0])) pl[1] = "";
         SpannableStringBuilder ps = new SpannableStringBuilder();
         if (!pl[0].isEmpty()) { Summary.append(ps, "● ", 0xFFFF8A00, true); Summary.append(ps, pl[0], p.fg, true); }
         v.setTextViewText(R.id.place, f.place ? ps : "");

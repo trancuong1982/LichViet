@@ -75,7 +75,7 @@ public final class WidgetRenderer {
 
     /* ---------------- Bảng màu ---------------- */
     static final class Pal {
-        int surface, fg, fg2, acc, red, rain, chipA, onChipA, chipB, onChipB, chipAlpha;
+        int surface, fg, fg2, acc, red, gold, rain, chipA, onChipA, chipB, onChipB, chipAlpha;
     }
 
     static int accentOf(Context c, String a, boolean dark) {
@@ -95,7 +95,7 @@ public final class WidgetRenderer {
         Pal p = new Pal();
         p.surface = dark ? 0xFF1C212B : 0xFFF6F8FD;
         if (f.onWall()) {
-            p.fg = 0xFFFFFFFF; p.fg2 = 0xE6FFFFFF; p.acc = 0xFFFFFFFF; p.red = 0xFFFFC2B8; p.rain = 0xFFCFE6FF;
+            p.fg = 0xFFFFFFFF; p.fg2 = 0xE6FFFFFF; p.acc = 0xFFFFFFFF; p.red = 0xFFFFC2B8; p.gold = 0xFFFFD98A; p.rain = 0xFFCFE6FF;
             p.chipA = 0xFFFFFFFF; p.onChipA = 0xFFFFFFFF; p.chipB = 0xFFFFFFFF; p.onChipB = 0xFFFFFFFF; p.chipAlpha = 64;
             return p;
         }
@@ -105,6 +105,7 @@ public final class WidgetRenderer {
         p.fg2 = darkText ? 0xFF5A6275 : 0xFFA9B1C2;
         p.acc = accentOf(c, f.accent, !darkText);
         p.red = darkText ? 0xFFC0392B : 0xFFFF8A7A;
+        p.gold = darkText ? 0xFFB8760A : 0xFFFFC94D;
         p.rain = darkText ? 0xFF2D6FD8 : 0xFF8DB8FF;
         p.chipA = darkSurface ? 0xFF4A3220 : 0xFFFFE2C7;   // âm lịch (cam đào)
         p.onChipA = darkSurface ? 0xFFFFDCC0 : 0xFF5C3410;
@@ -126,6 +127,11 @@ public final class WidgetRenderer {
         void fg2(int id) { col(id, "setTextColor", L.fg2, D.fg2); }
         void acc(int id) { col(id, "setTextColor", L.acc, D.acc); }
         void red(int id) { col(id, "setTextColor", L.red, D.red); }
+        void gold(int id) { col(id, "setTextColor", L.gold, D.gold); }
+        /** Màu theo quy tắc ngày: 1 đỏ, 2 vàng; 0 → màu mặc định (fg hoặc accent). */
+        void day(int id, int kind, boolean accent) {
+            if (kind == 1) red(id); else if (kind == 2) gold(id); else if (accent) acc(id); else fg(id);
+        }
         void rain(int id) { col(id, "setTextColor", L.rain, D.rain); }
         void tint(int id, boolean accent) { col(id, "setColorFilter", accent ? L.acc : L.fg2, accent ? D.acc : D.fg2); }
         /** kind 0 = cam đào (âm lịch), 1 = xanh (tuần, mưa) */
@@ -221,36 +227,46 @@ public final class WidgetRenderer {
         int wd = now.get(Calendar.DAY_OF_WEEK) - 1;
         Lunar.Date Lu = Lunar.fromSolar(d, mo, y);
         int week = Lunar.isoWeek(d, mo, y);
+        int kind = dayKind(d, mo, wd, Lu);
         JSONObject w = Weather.cached(c);
 
         switch (type) {
-            case "date": renderDate(c, p, f, d, mo, y, wd, week, Lu); break;
-            case "calendar": renderCalendar(p, f, d, mo, y, wd, week, Lu, w); break;
+            case "date": renderDate(c, p, f, d, mo, y, wd, week, Lu); dayColors(p, kind); break;
+            case "calendar": renderCalendar(p, f, d, mo, y, wd, week, Lu, w); dayColors(p, kind); break;
             case "weather": renderWeather(c, p, f, w, id); break;
             case "weather2": renderWeatherSmall(c, p, f, w, id); break;
-            case "calendar3": renderCalendarWide(c, p, f, d, mo, y, wd, week, Lu, w); break;
+            case "calendar3":
+                renderCalendarWide(c, p, f, d, mo, y, wd, week, Lu, w); dayColors(p, kind);
+                if (Lunar.suKien(d, mo, Lu) != null) { if (Lunar.ngayLe(d, mo, Lu) != null) p.red(R.id.d_l3); else p.gold(R.id.d_l3); }
+                break;
             case "compact":
                 clock(p, f);
                 v.setTextViewText(R.id.date, THU_NGAN[wd] + ", " + two(d) + "/" + two(mo) + (f.week ? " · W" + week : ""));
-                p.fg(R.id.date);
+                p.day(R.id.date, kind, false);
                 v.setViewVisibility(R.id.lunar, f.lunar ? View.VISIBLE : View.GONE);
                 v.setTextViewText(R.id.lunar, "ÂL " + lunarDM(Lu) + " · " + Lunar.canChiYear(Lu.year));
-                p.fg2(R.id.lunar);
+                if (kind == 2) p.gold(R.id.lunar); else p.fg2(R.id.lunar);
                 p.tint(R.id.divider, false);
                 current(c, p, f, w, false);
                 break;
             default: // clock
                 clock(p, f);
                 v.setTextViewText(R.id.date, dateText(f.date, d, mo, y, wd) + (f.week ? " · W" + week : ""));
-                p.fg(R.id.date);
+                p.day(R.id.date, kind, false);
                 v.setViewVisibility(R.id.lunar, f.lunar ? View.VISIBLE : View.GONE);
                 v.setTextViewText(R.id.lunar, "Âm lịch " + lunarDM(Lu) + " · " + Lunar.canChiYear(Lu.year)
                         + (Lu.day == 1 ? " · Mùng 1" : Lu.day == 15 ? " · Rằm" : ""));
-                p.fg2(R.id.lunar);
+                if (Lu.day == 1 || Lu.day == 15) p.gold(R.id.lunar); else p.fg2(R.id.lunar);
                 current(c, p, f, w, true);
                 bottomRow(c, p, f, w, id, type);
         }
         m.updateAppWidget(id, v);
+    }
+
+    /** Tô thứ + số ngày theo quy tắc màu chung. */
+    static void dayColors(Painter p, int kind) {
+        p.day(R.id.d_weekday, kind, false);
+        p.day(R.id.d_day, kind, true);
     }
 
     static void clock(Painter p, Cfg f) {
@@ -272,6 +288,47 @@ public final class WidgetRenderer {
             default: return THU[wd] + ", " + two(d) + "/" + two(m) + "/" + y;
         }
     }
+    /** QUY TẮC MÀU NGÀY (dùng chung mọi widget):
+     *  1 = đỏ: ngày lễ chính thức, Thứ Bảy, Chủ nhật; 2 = vàng: mùng 1, rằm; 0 = thường.
+     *  Thứ tự ưu tiên: ngày lễ > mùng 1/rằm > cuối tuần. */
+    static int dayKind(int d, int mo, int wd, Lunar.Date L) {
+        if (Lunar.ngayLe(d, mo, L) != null) return 1;
+        if (L.day == 1 || L.day == 15) return 2;
+        if (wd == 0 || wd == 6) return 1;
+        return 0;
+    }
+
+    /** Nhãn vị trí GPS thống nhất: "● Bến Nghé" hoặc "● Bến Nghé · TP.HCM". */
+    static CharSequence placeLabel(String place, boolean withProv, int textColor) {
+        String s = shortPlace(place);
+        if (s.isEmpty()) return "";
+        if (withProv) { String pv = province(place); if (!pv.isEmpty() && !pv.equals(s)) s += " · " + pv; }
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder();
+        Summary.append(sb, "● ", 0xFFFF8A00, true);
+        Summary.append(sb, s, textColor, false);
+        return sb;
+    }
+    static CharSequence placeLabel(String place, boolean withProv) {
+        String s = shortPlace(place);
+        if (s.isEmpty()) return "";
+        if (withProv) { String pv = province(place); if (!pv.isEmpty() && !pv.equals(s)) s += " · " + pv; }
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder("● " + s);
+        sb.setSpan(new android.text.style.ForegroundColorSpan(0xFFFF8A00), 0, 1, 0);
+        return sb;
+    }
+    static String province(String place) {
+        if (place == null) return "";
+        String[] parts = place.split(",");
+        if (parts.length < 2) return "";
+        String pv = parts[parts.length - 1].trim();
+        if (pv.equals("Việt Nam") && parts.length >= 3) pv = parts[parts.length - 2].trim();
+        if (pv.contains("Hồ Chí Minh")) return "TP.HCM";
+        if (pv.startsWith("Thành phố ")) return pv.substring(10);
+        if (pv.startsWith("TP. ")) return pv.substring(4);
+        if (pv.startsWith("Tỉnh ")) return pv.substring(5);
+        return pv;
+    }
+
     static String lunarDM(Lunar.Date L) { return L.day + "/" + L.month + (L.leap ? "N" : ""); }
     static String two(int n) { return n < 10 ? "0" + n : String.valueOf(n); }
     /** Tên ngắn cho widget: "Phường Bến Nghé, Quận 1, …" → "Bến Nghé"; "Phường 5, Quận 3" → "P.5, Q.3". */
@@ -338,8 +395,8 @@ public final class WidgetRenderer {
                 v.setTextViewText(R.id.wx_desc, Weather.desc(code) + " · " + Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0))
                         + "°/" + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0)) + "°");
                 p.fg2(R.id.wx_desc);
-                String place = shortPlace(Weather.place(c));
-                v.setViewVisibility(R.id.wx_place, f.place && !place.isEmpty() ? View.VISIBLE : View.GONE);
+                CharSequence place = placeLabel(Weather.place(c), false);
+                v.setViewVisibility(R.id.wx_place, f.place && place.length() > 0 ? View.VISIBLE : View.GONE);
                 v.setTextViewText(R.id.wx_place, place);
                 p.fg2(R.id.wx_place);
             }
@@ -372,8 +429,8 @@ public final class WidgetRenderer {
         p.fg(R.id.wx_place); p.fg2(R.id.wx_updated); p.fg(R.id.wx_temp); p.fg(R.id.wx_desc); p.fg2(R.id.wx_hilo);
         p.chip(R.id.rain_bg, R.id.rain, 1);
         v.setTextViewText(R.id.wx_updated, updatedText(c));
-        String place = shortPlace(Weather.place(c));
-        v.setTextViewText(R.id.wx_place, f.place ? (place.isEmpty() ? "Vị trí hiện tại" : place) : "");
+        CharSequence place = placeLabel(Weather.place(c), true);
+        v.setTextViewText(R.id.wx_place, f.place ? (place.length() == 0 ? "Vị trí hiện tại" : place) : "");
         if (w == null) {
             v.setTextViewText(R.id.wx_temp, "--°");
             v.setTextViewText(R.id.wx_desc, "Chưa có dữ liệu");
@@ -471,8 +528,8 @@ public final class WidgetRenderer {
         refreshButton(c, p, widgetId, "weather2");
         p.fg(R.id.wx_place); p.fg2(R.id.wx_updated); p.fg(R.id.wx_temp); p.fg(R.id.wx_desc); p.fg2(R.id.wx_hilo);
         p.chip(R.id.rain_bg, R.id.rain, 1);
-        String place = shortPlace(Weather.place(c));
-        v.setTextViewText(R.id.wx_place, f.place ? (place.isEmpty() ? "Vị trí hiện tại" : place) : "Thời tiết");
+        CharSequence place = placeLabel(Weather.place(c), false);
+        v.setTextViewText(R.id.wx_place, f.place ? (place.length() == 0 ? "Vị trí hiện tại" : place) : "Thời tiết");
         String up = updatedText(c);
         v.setTextViewText(R.id.wx_updated, up.isEmpty() || refreshing ? up : "Cập nhật " + up);
         if (w == null) {
