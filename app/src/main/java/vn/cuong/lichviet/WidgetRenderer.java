@@ -393,13 +393,6 @@ public final class WidgetRenderer {
         refreshButton(c, p, widgetId, type);
     }
 
-    private static final int[][] H_IDS = {
-            {R.id.h0, R.id.h0_time, R.id.h0_icon, R.id.h0_temp, R.id.h0_pop},
-            {R.id.h1, R.id.h1_time, R.id.h1_icon, R.id.h1_temp, R.id.h1_pop},
-            {R.id.h2, R.id.h2_time, R.id.h2_icon, R.id.h2_temp, R.id.h2_pop},
-            {R.id.h3, R.id.h3_time, R.id.h3_icon, R.id.h3_temp, R.id.h3_pop},
-            {R.id.h4, R.id.h4_time, R.id.h4_icon, R.id.h4_temp, R.id.h4_pop}};
-
     private static void renderDate(Context c, Painter p, Cfg f, int d, int mo, int y, int wd, int week, Lunar.Date Lu) {
         RemoteViews v = p.v;
         v.setTextViewText(R.id.d_weekday, THU[wd]);
