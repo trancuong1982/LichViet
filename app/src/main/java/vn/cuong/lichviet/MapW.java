@@ -73,7 +73,7 @@ public final class MapW {
     /** Vẽ bản đồ VN, sáng tại vị trí GPS. */
     static Bitmap drawMap(Context c, Summary.P p, float dens, double lat, double lon, boolean hasLoc) {
         MapData m = map(c);
-        float wDp = 120;
+        float wDp = 100;
         float s = wDp * dens / m.W;
         int Wp = Math.round(m.W * s), Hp = Math.round(m.H * s);
         Bitmap b = Bitmap.createBitmap(Math.max(1, Wp), Math.max(1, Hp), Bitmap.Config.ARGB_8888);
@@ -101,12 +101,6 @@ public final class MapW {
         dot.setColor(dt ? 0xCC2D4BA0 : 0xD9FFFFFF);
         for (float[] arr : new float[][]{m.hs, m.ts})
             if (arr != null) for (int i = 0; i < arr.length; i += 2) cv.drawCircle(arr[i] * s, arr[i + 1] * s, 1.1f * dens, dot);
-        Paint tx = new Paint(Paint.ANTI_ALIAS_FLAG);
-        tx.setTextAlign(Paint.Align.CENTER);
-        tx.setTextSize(7.5f * dens);
-        tx.setColor(p.fg2);
-        if (m.hs != null) { float[] cc = center(m.hs); cv.drawText("Hoàng Sa", Math.min(cc[0] * s, Wp - 16 * dens), (minY(m.hs) - 5) * s, tx); }
-        if (m.ts != null) { float[] cc = center(m.ts); cv.drawText("Trường Sa", Math.min(cc[0] * s, Wp - 18 * dens), (maxY(m.ts) + 13) * s, tx); }
         // vị trí GPS: vùng tỏa sáng + vòng + điểm
         if (hasLoc) {
             float x = (float) ((lon - m.lon0) * m.k * m.sx) * s, y = (float) ((m.lat1 - lat) * m.sx) * s;
@@ -178,7 +172,8 @@ public final class MapW {
         }
         Intent open = new Intent(c, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         v.setOnClickPendingIntent(R.id.root, PendingIntent.getActivity(c, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-        for (int d : new int[]{R.id.div1, R.id.div2}) { v.setInt(d, "setColorFilter", p.fg); v.setInt(d, "setImageAlpha", light ? 36 : 64); }
+        v.setInt(R.id.panel, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
+        v.setInt(R.id.panel, "setImageAlpha", light ? 20 : 26);
 
         Calendar now = Calendar.getInstance();
         int d = now.get(Calendar.DAY_OF_MONTH), mo = now.get(Calendar.MONTH) + 1, y = now.get(Calendar.YEAR);
@@ -201,7 +196,7 @@ public final class MapW {
         boolean lunarMark = L.day == 1 || L.day == 15;
         int kind = WidgetRenderer.dayKind(d, mo, wd, L);
         int kc = kind == 1 ? p.red : kind == 2 ? p.gold : p.fg;
-        v.setImageViewBitmap(R.id.big3d, Summary.draw3D(String.valueOf(d), kind, p, dens, 120, 92));
+        v.setImageViewBitmap(R.id.big3d, Summary.draw3D(String.valueOf(d), kind, p, dens, 82, 68));
         v.setTextViewText(R.id.d_weekday, WidgetRenderer.THU[wd]);
         v.setTextColor(R.id.d_weekday, kc);
         v.setTextViewText(R.id.d_month, "Tháng " + mo + " · " + y);
@@ -229,8 +224,8 @@ public final class MapW {
             int mc = g.diem >= 4 ? p.good : (g.diem == 3 ? p.mid : p.red);
             SpannableStringBuilder sb = new SpannableStringBuilder();
             Summary.append(sb, "● ", mc, true);
-            Summary.append(sb, "Tuổi " + Lunar.CHI[ct] + ": ", p.fg2, false);
-            Summary.append(sb, g.diem == 3 ? "Bình thường" : "Ngày " + g.muc, mc, true);
+            Summary.append(sb, "Tuổi " + Lunar.CHI[ct] + " · ", p.fg2, false);
+            Summary.append(sb, g.diem == 3 ? "Bình thường" : g.muc, mc, true);
             v.setViewVisibility(R.id.tuoi, View.VISIBLE);
             v.setTextViewText(R.id.tuoi, sb);
         } else v.setViewVisibility(R.id.tuoi, View.GONE);
@@ -238,9 +233,9 @@ public final class MapW {
         // ----- Thời tiết -----
         JSONObject w = Weather.cached(c);
         v.setViewVisibility(R.id.wx_col, f.weather ? View.VISIBLE : View.GONE);
-        v.setViewVisibility(R.id.div1, f.weather ? View.VISIBLE : View.GONE);
-        for (int t : new int[]{R.id.wx_temp, R.id.wx_desc, R.id.rain}) v.setTextColor(t, p.fg);
+        for (int t : new int[]{R.id.wx_temp, R.id.wx_desc}) v.setTextColor(t, p.fg);
         v.setTextColor(R.id.wx_hilo, p.fg2);
+        v.setTextColor(R.id.rain, p.fg2);
         if (w != null) {
             try {
                 JSONObject cur = w.getJSONObject("current"), dl = w.getJSONObject("daily"), h = w.getJSONObject("hourly");
@@ -274,10 +269,7 @@ public final class MapW {
             v.setTextViewText(R.id.rain, "");
         }
         Intent r = new Intent(c, MapWidget.class).setAction(BaseWidget.ACTION_REFRESH);
-        v.setOnClickPendingIntent(R.id.btn_refresh, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-        v.setInt(R.id.rf_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
-        v.setInt(R.id.rf_bg, "setImageAlpha", light ? 40 : 60);
-        v.setInt(R.id.rf_icon, "setColorFilter", p.fg);
+        v.setOnClickPendingIntent(R.id.wx_col, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         if (WidgetRenderer.refreshing) v.setTextViewText(R.id.rain, "Đang cập nhật…");
 
         // ----- Bản đồ + địa điểm -----

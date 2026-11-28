@@ -257,7 +257,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var light = cfg.tone === "light" || (cfg.tone === "auto" && WALL_LIGHT), glass = cfg.style === "glass", solid = cfg.style === "solid";
     var P = light ? { fg: "#16203A", fg2: "rgba(22,32,58,.72)", red: "#E0322A", gold: "#B8760A", good: "#1F7A5C", mid: "#8A6400", acc: "#2D4BA0", face: ["#B9D0FF", "#4A78FF"], ex: "#2342A8" }
       : { fg: "#fff", fg2: "rgba(255,255,255,.9)", red: "#FF7A6E", gold: "#FFC94D", good: "#A6F2CF", mid: "#FFE29A", acc: "#8FC2FF", face: ["#FFFFFF", "#FFFFFF"], ex: "#3F6BE8" };
-    var wg = $("wg"); wg.style.maxWidth = "400px"; wg.className = "wg" + (light ? "" : " wall"); wg.style.color = P.fg;
+    var wg = $("wg"); wg.style.maxWidth = "340px"; wg.className = "wg" + (light ? "" : " wall"); wg.style.color = P.fg;
     $("bgl").style.opacity = solid ? cfg.opacity / 100 : 1;
     $("bgl").style.background = solid ? (light ? "#F6F8FD" : "#1C212B") : glass ? (light ? "linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.40) 45%,rgba(255,255,255,.54))" : "linear-gradient(135deg,rgba(14,20,40,.46),rgba(14,20,40,.30) 50%,rgba(14,20,40,.42))") : "transparent";
     wg.style.boxShadow = glass ? "inset 0 0 0 1px " + (light ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.38)") : "none";
@@ -265,15 +265,15 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var kind = dayKind(d, m, wd, L), kc = kind === 1 ? P.red : kind === 2 ? P.gold : P.fg;
     var face = kind === 1 ? ["#FFE9E5", "#FF4D3D"] : kind === 2 ? ["#FFF6D6", "#FFB020"] : P.face, ex = kind === 1 ? "#B3261E" : kind === 2 ? "#B36B00" : P.ex;
     var hr = now.getHours(), greet = hr >= 6 && hr < 12 ? "Buổi sáng an lành" : hr >= 12 && hr < 15 ? "Buổi trưa vui vẻ" : hr >= 15 && hr < 18 ? "Buổi chiều bình an" : hr >= 18 && hr < 22 ? "Buổi tối hạnh phúc" : "Chúc ngủ ngon";
-    var base = "position:absolute;left:0;top:0;font-size:76px;font-weight:900;line-height:80px;letter-spacing:-2px";
-    var three = '<div style="position:relative;height:82px"><div style="' + base + ";color:" + ex + ";text-shadow:1px 1px 0 " + ex + ",2px 2px 0 " + ex + ",3px 3px 0 " + ex + ",4px 4px 0 " + ex + ',6px 8px 10px rgba(0,0,0,.35)">' + d + '</div><div style="' + base +
+    var base = "position:absolute;left:0;top:0;font-size:62px;font-weight:900;line-height:66px;letter-spacing:-2px";
+    var three = '<div style="position:relative;height:68px;width:82px;flex:none"><div style="' + base + ";color:" + ex + ";text-shadow:1px 1px 0 " + ex + ",2px 2px 0 " + ex + ",3px 3px 0 " + ex + ",4px 4px 0 " + ex + ',6px 8px 10px rgba(0,0,0,.35)">' + d + '</div><div style="' + base +
       ";text-shadow:none;background:linear-gradient(180deg," + face[0] + " 10%," + face[1] + ' 92%);-webkit-background-clip:text;background-clip:text;color:transparent">' + d + "</div></div>";
     var rem = [];
     (EVENTS || builtinEvents()).forEach(function (e) { if (e.y === y && e.m === m && e.d === d) { var c = e.kind === 0 ? P.acc : e.kind === 1 ? P.red : P.gold; var it = '<div class="ell" style="font-size:10px;font-weight:700;color:' + (e.kind === 0 ? P.fg : c) + '"><span style="color:' + c + '">●</span> ' + e.title + "</div>"; if (e.kind === 0) rem.unshift(it); else rem.push(it); } });
     if (!EVENTS && mk) rem.push('<div class="ell" style="font-size:10px;font-weight:700;color:' + P.gold + '">● ' + (L.day === 1 ? "Mùng 1" : "Rằm") + " tháng " + THANG[L.month] + "</div>");
     var t = birth && cfg.tuoi ? Lunar.tuoi.apply(null, birth.split("-").map(Number).reverse()) : null, tu = "";
     if (t) { var g = Lunar.danhGia(d, m, y, t.chi), mc = g.diem >= 4 ? P.good : g.diem === 3 ? P.mid : P.red;
-      tu = '<div class="ell" style="font-size:10px;font-weight:700"><span style="color:' + mc + '">●</span> <span style="color:' + P.fg2 + ';font-weight:400">Tuổi ' + t.canChi.split(" ")[1] + ':</span> <span style="color:' + mc + '">' + (g.diem === 3 ? "Bình thường" : "Ngày " + g.muc) + "</span></div>"; }
+      tu = '<div class="ell" style="font-size:10px;font-weight:700"><span style="color:' + mc + '">●</span> <span style="color:' + P.fg2 + ';font-weight:400">Tuổi ' + t.canChi.split(" ")[1] + ' ·</span> <span style="color:' + mc + '">' + (g.diem === 3 ? "Bình thường" : g.muc) + "</span></div>"; }
     var w = data && data.w, cur = w && w.current, fc = "";
     if (w && w.hourly) {
       var BU = ["Sáng", "Trưa", "Chiều", "Tối", "Đêm"], KH = [[6, 11, 9], [11, 14, 12], [14, 18, 16], [18, 22, 20], [22, 30, 24]];
@@ -281,7 +281,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
       var t0 = w.hourly.time.indexOf(y + "-" + pad(m) + "-" + pad(d) + "T00:00"), bs = t0 + (hr < 6 ? -24 : 0);
       for (var k = 0; k < 3; k++) { bo++; if (bo > 4) { bo = 0; bs += 24; } var kh = KH[bo], mx = 0, rp = bs + kh[2];
         for (var i = bs + kh[0]; i < bs + kh[1]; i++) if (i >= 0 && w.hourly.weather_code[i] != null) mx = Math.max(mx, w.hourly.weather_code[i]);
-        fc += '<div style="flex:1;text-align:center"><div style="font-size:10px;color:' + P.fg2 + '">' + BU[bo] + '</div><span class="wi" style="width:22px;height:22px">' + WX.icon(mx, w.hourly.is_day ? w.hourly.is_day[rp] : 1) + '</span><div style="font-size:11px;font-weight:700">' + (w.hourly.temperature_2m[rp] != null ? Math.round(w.hourly.temperature_2m[rp]) + "°" : "--") + "</div></div>"; }
+        fc += '<div style="flex:1;text-align:center;line-height:1.25"><div style="font-size:10px;color:' + P.fg2 + '">' + BU[bo] + '</div><span class="wi" style="width:22px;height:22px">' + WX.icon(mx, w.hourly.is_day ? w.hourly.is_day[rp] : 1) + '</span><div style="font-size:11px;font-weight:700">' + (w.hourly.temperature_2m[rp] != null ? Math.round(w.hourly.temperature_2m[rp]) + "°" : "--") + "</div></div>"; }
     }
     var wx = cfg.weather ? '<div style="width:1px;background:' + P.fg + ';opacity:.25;margin:0 8px"></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px">' +
       '<div style="display:flex;align-items:center;gap:3px"><span class="wi" style="width:38px;height:38px">' + (cur ? WX.icon(cur.weather_code, cur.is_day) : WX_ICONS.partly_day) + '</span><span style="font-size:28px;font-weight:600">' + (cur ? Math.round(cur.temperature_2m) : "--") + "°</span></div>" +
@@ -291,11 +291,19 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var pl = data && data.place ? data.place : "", prov = pl.split(",").pop().trim().replace(/^Thành phố /, "TP. ").replace(/^Tỉnh /, "");
     var place = cfg.place && pl ? '<div class="ell" style="font-size:12px;font-weight:700;text-align:center"><span style="color:#FF8A00">●</span> ' + shortPlace(pl) + '</div><div class="ell" style="font-size:10px;text-align:center;color:' + P.fg2 + '">' + (provOf(pl) !== shortPlace(pl) ? provOf(pl) : "") + "</div>" : "";
     var hh = cfg.h24 ? pad(hr) : ((hr % 12) || 12);
-    $("content").innerHTML = '<div style="display:flex;height:196px"><div style="flex:1;min-width:0;display:flex;flex-direction:column">' +
-      '<div style="display:flex;align-items:center"><b class="ell" style="flex:1;font-size:13px">' + greet + '</b><b style="font-size:22px">' + hh + ":" + pad(now.getMinutes()) + "</b>" + (cfg.h24 ? "" : '<b style="font-size:11px;margin-left:2px">' + (hr < 12 ? "AM" : "PM") + "</b>") + "</div>" +
-      '<div style="flex:1;display:flex;margin-top:4px;min-height:0"><div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">' + three +
-      '<div style="font-size:15px;font-weight:800;color:' + kc + '">' + THU[wd] + '</div><div style="font-size:11px;font-weight:600">Tháng ' + m + " · " + y + '</div><div style="font-size:10px;color:' + P.fg2 + '">ÂL ' + L.day + "/" + L.month + " · " + Lunar.canChiYear(L.year) + "</div>" + rem.slice(0, 2).join("") + tu + "</div>" + wx + "</div></div>" +
-      '<div style="width:1px;background:' + P.fg + ';opacity:.25;margin:0 4px 0 8px"></div><div style="flex:0 0 96px;display:flex;flex-direction:column;justify-content:center"><div style="height:130px">' + mapSvg(light, data && data.lat, data && data.lon) + "</div>" + place + "</div></div>";
+    var hh = cfg.h24 ? pad(hr) : ((hr % 12) || 12);
+    var hint = w ? WX.rainHint(w).replace("Có thể mưa trong giờ này", "Mưa giờ này").replace("Có thể mưa khoảng ", "Mưa ~").replace("Có dông khoảng ", "Dông ~").replace("Không mưa trong 12 giờ tới", "Không mưa 12h").replace(" (", " · ").replace("%)", "%") : "";
+    $("content").innerHTML = '<div style="display:flex;flex-direction:column;height:236px;gap:6px">' +
+      '<div style="display:flex;align-items:center"><b class="ell" style="flex:1;font-size:13px">' + greet + '</b><b style="font-size:24px;line-height:1">' + hh + ":" + pad(now.getMinutes()) + "</b>" + (cfg.h24 ? "" : '<b style="font-size:11px;margin-left:2px">' + (hr < 12 ? "AM" : "PM") + "</b>") + "</div>" +
+      '<div style="flex:1;display:flex;gap:8px;min-height:0;margin-bottom:2px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">' +
+      '<div style="display:flex;align-items:center;gap:12px">' + three + '<div style="min-width:0"><div class="ell" style="font-size:17px;font-weight:800;color:' + kc + '">' + THU[wd] + '</div><div class="ell" style="font-size:12px;font-weight:600;margin-top:4px">Tháng ' + m + " · " + y +
+      '</div><div class="ell" style="font-size:11px;color:' + P.fg2 + ';margin-top:3px">ÂL ' + L.day + "/" + L.month + " · " + Lunar.canChiYear(L.year) + "</div></div></div>" +
+      '<div style="margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:11px">' + rem.slice(0, 2).join("") + tu + "</div></div>" +
+      '<div style="flex:0 0 94px;display:flex;flex-direction:column;justify-content:center;align-items:center"><div style="height:104px;width:94px">' + mapSvg(light, data && data.lat, data && data.lon) + "</div>" + place + "</div></div>" +
+      (cfg.weather ? '<div style="border-radius:16px;background:' + (light ? "rgba(45,75,160,.08)" : "rgba(255,255,255,.10)") + ';padding:6px 8px 6px 10px;display:flex;align-items:center;gap:4px">' +
+        '<span class="wi" style="width:32px;height:32px;flex:none">' + (cur ? WX.icon(cur.weather_code, cur.is_day) : WX_ICONS.partly_day) + '</span><span style="font-size:26px;font-weight:600;width:54px;flex:none">' + (cur ? Math.round(cur.temperature_2m) : "--") + "°</span>" +
+        '<div style="width:86px;flex:none;min-width:0"><div class="ell" style="font-size:11px;font-weight:700">' + (cur ? WX.desc(cur.weather_code) : "Chưa có dữ liệu") + '</div><div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cur ? Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "° · ẩm " + cur.relative_humidity_2m + "%" : "") +
+        '</div><div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + hint + '</div></div><div style="flex:1;display:flex">' + fc + "</div></div>" : "") + "</div>";
   }
   function render() {
     if (TYPE === "map") { renderMap(); return; }
