@@ -191,15 +191,22 @@ public final class MapW {
         v.setTextViewText(R.id.ampm, hour < 12 ? "AM" : "PM");
         v.setTextColor(R.id.ampm, p.fg);
 
+        // ----- Châm ngôn mỗi ngày (chạm để đổi câu) -----
+        v.setTextViewText(R.id.quote, Quotes.today(c));
+        v.setTextColor(R.id.quote, p.fg2);
+        v.setInt(R.id.quote_icon, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFE29A);
+        Intent nq = new Intent(c, MapWidget.class).setAction(BaseWidget.ACTION_NEXT_QUOTE);
+        v.setOnClickPendingIntent(R.id.quote_box, PendingIntent.getBroadcast(c, 3000 + id, nq, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+
         // ----- Ngày 3D + nhắc nhở -----
         String le = Lunar.ngayLe(d, mo, L);
         boolean lunarMark = L.day == 1 || L.day == 15;
         int kind = WidgetRenderer.dayKind(d, mo, wd, L);
         int kc = kind == 1 ? p.red : kind == 2 ? p.gold : p.fg;
-        v.setImageViewBitmap(R.id.big3d, Summary.draw3D(String.valueOf(d), kind, p, dens, 82, 68));
+        v.setImageViewBitmap(R.id.big3d, Summary.draw3D(String.valueOf(d), kind, p, dens, 74, 62));
         v.setTextViewText(R.id.d_weekday, WidgetRenderer.THU[wd]);
         v.setTextColor(R.id.d_weekday, kc);
-        v.setTextViewText(R.id.d_month, "Tháng " + mo + " · " + y);
+        v.setTextViewText(R.id.d_month, "W" + Lunar.isoWeek(d, mo, y) + " · T" + mo + "/" + y);
         v.setTextColor(R.id.d_month, p.fg);
         v.setTextViewText(R.id.d_lunar, "ÂL " + WidgetRenderer.lunarDM(L) + " · " + Lunar.canChiYear(L.year));
         v.setTextColor(R.id.d_lunar, p.fg2);
