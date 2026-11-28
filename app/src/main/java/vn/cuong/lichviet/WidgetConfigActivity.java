@@ -79,7 +79,9 @@ public class WidgetConfigActivity extends Activity {
             if (raw == null) return "";
             try {
                 return new JSONObject().put("w", new JSONObject(raw))
-                        .put("place", Weather.place(WidgetConfigActivity.this)).toString();
+                        .put("place", Weather.place(WidgetConfigActivity.this))
+                        .put("lat", Double.parseDouble(Weather.prefs(WidgetConfigActivity.this).getString("lat", "0")))
+                        .put("lon", Double.parseDouble(Weather.prefs(WidgetConfigActivity.this).getString("lon", "0"))).toString();
             } catch (Exception e) { return ""; }
         }
 

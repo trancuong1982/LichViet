@@ -311,7 +311,8 @@
     { id: "weather", name: "Thời tiết theo giờ", size: "4×3" }, { id: "weather2", name: "Thời tiết", size: "2×2" },
     { id: "calendar3", name: "Lịch ngày đầy đủ", size: "3×2" }, { id: "calendar", name: "Lịch ngày", size: "2×2" },
     { id: "compact", name: "Thanh gọn", size: "4×1" }, { id: "summary", name: "Tổng hợp", size: "5×3" },
-    { id: "summaryq", name: "Tổng hợp + Châm ngôn", size: "5×3" }
+    { id: "summaryq", name: "Tổng hợp + Châm ngôn", size: "5×3" },
+    { id: "map", name: "Bản đồ Việt Nam", size: "5×3" }
   ];
   function renderBirthInfo() {
     var t = tuoiInfo();

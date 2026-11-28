@@ -200,6 +200,18 @@ public final class Weather {
         return R.drawable.wx_cloud;
     }
 
+    /** Biểu tượng sinh động (có chuyển màu) cho widget bản đồ. */
+    public static int iconVivid(int code, boolean day) {
+        if (code == 0) return day ? R.drawable.wxv_sun : R.drawable.wxv_moon;
+        if (code == 1 || code == 2) return day ? R.drawable.wxv_partly_day : R.drawable.wxv_partly_night;
+        if (code == 3) return R.drawable.wxv_cloud;
+        if (code == 45 || code == 48) return R.drawable.wxv_fog;
+        if (code >= 51 && code <= 57) return R.drawable.wxv_drizzle;
+        if (code >= 95) return R.drawable.wxv_thunder;
+        if (code >= 61) return R.drawable.wxv_rain;
+        return R.drawable.wxv_cloud;
+    }
+
     public static String desc(int code) {
         switch (code) {
             case 0: return "Trời quang";

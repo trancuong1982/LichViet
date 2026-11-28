@@ -38,7 +38,8 @@ public final class Summary {
     static final class P {
         boolean darkText;
         int fg, fg2, red, orange, good, mid, acc, todayBg, todayFg;
-        int faceTop, faceBot, faceRedTop, faceRedBot, ex, exRed, glow, glowRed;
+        int faceTop, faceBot, faceRedTop, faceRedBot, ex, exRed, glow, glowRed, gold;
+        int faceGoldTop = 0xFFFFF6D6, faceGoldBot = 0xFFFFB020, exGold = 0xFFB36B00, glowGold = 0x8CFFB020;
     }
 
     /** Hình nền sáng? (Android cho biết qua màu hình nền) */
@@ -64,6 +65,7 @@ public final class Summary {
             p.mid = 0xFFFFE29A; p.acc = 0xFFFFFFFF; p.todayBg = 0xFFFFFFFF; p.todayFg = 0xFF1B2A5C;
             p.faceTop = 0xFFFFFFFF; p.faceBot = 0xFFFFFFFF; p.ex = 0xFF3F6BE8; p.glow = 0x8C78AAFF;
         }
+        p.gold = darkText ? 0xFFB8760A : 0xFFFFC94D;
         p.faceRedTop = 0xFFFFE9E5; p.faceRedBot = 0xFFFF4D3D; p.exRed = 0xFFB3261E; p.glowRed = 0x8CFF5A46;
         return p;
     }
@@ -320,15 +322,19 @@ public final class Summary {
         return Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
     }
 
-    public static Bitmap draw3D(String num, boolean red, P p, float dens) {
-        int W = Math.round(112 * dens), H = Math.round(84 * dens);
+    public static Bitmap draw3D(String num, boolean red, P p, float dens) { return draw3D(num, red ? 1 : 0, p, dens, 112, 84); }
+
+    /** kind: 0 thường, 1 đỏ (T7/CN/lễ), 2 vàng (mùng 1, rằm) */
+    public static Bitmap draw3D(String num, int kind, P p, float dens, int wDp, int hDp) {
+        boolean red = kind == 1, gold = kind == 2;
+        int W = Math.round(wDp * dens), H = Math.round(hDp * dens);
         Bitmap b = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
         Canvas cv = new Canvas(b);
         float ext = 5 * dens, step = dens;
         Paint pt = new Paint(Paint.ANTI_ALIAS_FLAG);
         pt.setTypeface(heavy());
         pt.setLetterSpacing(-0.03f);
-        float ts = 74 * dens;
+        float ts = hDp * 0.9f * dens;
         pt.setTextSize(ts);
         float avail = W - ext - 10 * dens, tw = pt.measureText(num);
         if (tw > avail) { ts = ts * avail / tw; pt.setTextSize(ts); tw = pt.measureText(num); }
@@ -337,8 +343,8 @@ public final class Summary {
         float availH = H - ext - 8 * dens;
         if (bd.height() > availH) { ts = ts * availH / bd.height(); pt.setTextSize(ts); tw = pt.measureText(num); pt.getTextBounds(num, 0, num.length(), bd); }
         float x = (W - ext - tw) / 2f, yb = (H - ext - bd.height()) / 2f - bd.top;
-        int ex = red ? p.exRed : p.ex, glow = red ? p.glowRed : p.glow;
-        int fTop = red ? p.faceRedTop : p.faceTop, fBot = red ? p.faceRedBot : p.faceBot;
+        int ex = red ? p.exRed : gold ? p.exGold : p.ex, glow = red ? p.glowRed : gold ? p.glowGold : p.glow;
+        int fTop = red ? p.faceRedTop : gold ? p.faceGoldTop : p.faceTop, fBot = red ? p.faceRedBot : gold ? p.faceGoldBot : p.faceBot;
 
         // bóng mềm
         pt.setColor(ex);
