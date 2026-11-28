@@ -173,7 +173,7 @@ public final class MapW {
         Intent open = new Intent(c, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         v.setOnClickPendingIntent(R.id.root, PendingIntent.getActivity(c, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         v.setInt(R.id.panel, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
-        v.setInt(R.id.panel, "setImageAlpha", light ? 20 : 26);
+        v.setInt(R.id.panel, "setImageAlpha", (!glass && !solid) ? 0 : (light ? 20 : 26));
 
         Calendar now = Calendar.getInstance();
         int d = now.get(Calendar.DAY_OF_MONTH), mo = now.get(Calendar.MONTH) + 1, y = now.get(Calendar.YEAR);

@@ -96,7 +96,7 @@ public final class WidgetRenderer {
         p.surface = dark ? 0xFF1C212B : 0xFFF6F8FD;
         if (f.onWall()) {
             p.fg = 0xFFFFFFFF; p.fg2 = 0xE6FFFFFF; p.acc = 0xFFFFFFFF; p.red = 0xFFFFC2B8; p.gold = 0xFFFFD98A; p.rain = 0xFFCFE6FF;
-            p.chipA = 0xFFFFFFFF; p.onChipA = 0xFFFFFFFF; p.chipB = 0xFFFFFFFF; p.onChipB = 0xFFFFFFFF; p.chipAlpha = 64;
+            p.chipA = 0xFFFFFFFF; p.onChipA = 0xFFFFFFFF; p.chipB = 0xFFFFFFFF; p.onChipB = 0xFFFFFFFF; p.chipAlpha = f.opacity < 35 ? 0 : 64;   // trong suốt: không khối nền
             return p;
         }
         boolean darkText = "dark".equals(f.text) || (!"white".equals(f.text) && !dark);

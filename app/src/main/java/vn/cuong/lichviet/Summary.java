@@ -158,7 +158,7 @@ public final class Summary {
         Intent r = new Intent(c, q ? SummaryQuoteWidget.class : SummaryWidget.class).setAction(BaseWidget.ACTION_REFRESH);
         v.setOnClickPendingIntent(R.id.btn_refresh, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         v.setInt(R.id.rf_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
-        v.setInt(R.id.rf_bg, "setImageAlpha", light ? 40 : 60);
+        v.setInt(R.id.rf_bg, "setImageAlpha", (!glass && !solid) ? 0 : (light ? 40 : 60));
         v.setInt(R.id.rf_icon, "setColorFilter", p.fg);
 
         // ----- Cột ngày 3D -----
@@ -252,7 +252,7 @@ public final class Summary {
             v.setTextViewText(R.id.quote, Quotes.today(c));
             v.setTextColor(R.id.quote, p.fg);
             v.setInt(R.id.quote_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
-            v.setInt(R.id.quote_bg, "setImageAlpha", light ? 22 : 30);
+            v.setInt(R.id.quote_bg, "setImageAlpha", (!glass && !solid) ? 0 : (light ? 22 : 30));
             v.setInt(R.id.quote_icon, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFE29A);
             Intent nq = new Intent(c, SummaryQuoteWidget.class).setAction(BaseWidget.ACTION_NEXT_QUOTE);
             v.setOnClickPendingIntent(R.id.quote_box, PendingIntent.getBroadcast(c, 3000 + id, nq, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
@@ -330,17 +330,17 @@ public final class Summary {
         int W = Math.round(wDp * dens), H = Math.round(hDp * dens);
         Bitmap b = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
         Canvas cv = new Canvas(b);
-        float ext = 5 * dens, step = dens;
+        float ext = 4 * dens, step = dens, pad = 5 * dens;   // pad: chừa chỗ cho bóng mờ, không bị cắt thành khung
         Paint pt = new Paint(Paint.ANTI_ALIAS_FLAG);
         pt.setTypeface(heavy());
         pt.setLetterSpacing(-0.03f);
         float ts = hDp * 0.9f * dens;
         pt.setTextSize(ts);
-        float avail = W - ext - 10 * dens, tw = pt.measureText(num);
+        float avail = W - ext - 2 * pad, tw = pt.measureText(num);
         if (tw > avail) { ts = ts * avail / tw; pt.setTextSize(ts); tw = pt.measureText(num); }
         Rect bd = new Rect();
         pt.getTextBounds(num, 0, num.length(), bd);
-        float availH = H - ext - 8 * dens;
+        float availH = H - ext - 2 * pad;
         if (bd.height() > availH) { ts = ts * availH / bd.height(); pt.setTextSize(ts); tw = pt.measureText(num); pt.getTextBounds(num, 0, num.length(), bd); }
         float x = (W - ext - tw) / 2f, yb = (H - ext - bd.height()) / 2f - bd.top;
         int ex = red ? p.exRed : gold ? p.exGold : p.ex, glow = red ? p.glowRed : gold ? p.glowGold : p.glow;
@@ -348,10 +348,10 @@ public final class Summary {
 
         // bóng mềm
         pt.setColor(ex);
-        pt.setShadowLayer(9 * dens, 5 * dens, 7 * dens, 0x59000000);
+        pt.setShadowLayer(3 * dens, 1.5f * dens, 2 * dens, 0x4D000000);
         cv.drawText(num, x + ext, yb + ext, pt);
         // quầng sáng
-        pt.setShadowLayer(9 * dens, 0, 0, glow);
+        pt.setShadowLayer(4 * dens, 0, 0, glow);
         cv.drawText(num, x + ext / 2, yb + ext / 2, pt);
         pt.clearShadowLayer();
         // khối nổi
