@@ -26,8 +26,7 @@ public final class WidgetRenderer {
 
     @SuppressWarnings("unchecked")
     static final Class<? extends BaseWidget>[] PROVIDERS = new Class[]{
-            ClockWidget.class, DateWidget.class, WeatherWidget.class, WeatherSmallWidget.class,
-            CalendarWidget.class, CalendarWideWidget.class, CompactWidget.class, SummaryWidget.class, SummaryQuoteWidget.class, MapWidget.class};
+            ClockWidget.class, DateWidget.class, CompactWidget.class, SummaryQuoteWidget.class, MapWidget.class};
 
     /** Đang tải thời tiết (để hiện "Đang cập nhật…" trên widget). */
     static volatile boolean refreshing = false;
@@ -159,12 +158,7 @@ public final class WidgetRenderer {
 
     public static String typeOf(Class<?> cls) {
         if (cls == CompactWidget.class) return "compact";
-        if (cls == WeatherWidget.class) return "weather";
-        if (cls == CalendarWidget.class) return "calendar";
         if (cls == DateWidget.class) return "date";
-        if (cls == WeatherSmallWidget.class) return "weather2";
-        if (cls == CalendarWideWidget.class) return "calendar3";
-        if (cls == SummaryWidget.class) return "summary";
         if (cls == SummaryQuoteWidget.class) return "summaryq";
         if (cls == MapWidget.class) return "map";
         return "clock";
@@ -172,12 +166,7 @@ public final class WidgetRenderer {
     public static Class<? extends BaseWidget> classOf(String type) {
         switch (type) {
             case "compact": return CompactWidget.class;
-            case "weather": return WeatherWidget.class;
-            case "calendar": return CalendarWidget.class;
             case "date": return DateWidget.class;
-            case "weather2": return WeatherSmallWidget.class;
-            case "calendar3": return CalendarWideWidget.class;
-            case "summary": return SummaryWidget.class;
             case "summaryq": return SummaryQuoteWidget.class;
             case "map": return MapWidget.class;
             default: return ClockWidget.class;
@@ -195,18 +184,13 @@ public final class WidgetRenderer {
     static int layoutOf(String type) {
         switch (type) {
             case "compact": return R.layout.widget_compact;
-            case "weather": return R.layout.widget_weather;
-            case "calendar": return R.layout.widget_calendar;
             case "date": return R.layout.widget_date;
-            case "weather2": return R.layout.widget_weather2;
-            case "calendar3": return R.layout.widget_calendar3;
             default: return R.layout.widget_clock;
         }
     }
 
     public static void render(Context c, AppWidgetManager m, int id, String type) {
         Cfg f = Cfg.load(c, id);
-        if ("summary".equals(type)) { Summary.render(c, m, id, f, false); return; }
         if ("summaryq".equals(type)) { Summary.render(c, m, id, f, true); return; }
         if ("map".equals(type)) { MapW.render(c, m, id, f); return; }
         RemoteViews v = new RemoteViews(c.getPackageName(), layoutOf(type));
@@ -232,13 +216,6 @@ public final class WidgetRenderer {
 
         switch (type) {
             case "date": renderDate(c, p, f, d, mo, y, wd, week, Lu); dayColors(p, kind); break;
-            case "calendar": renderCalendar(p, f, d, mo, y, wd, week, Lu, w); dayColors(p, kind); break;
-            case "weather": renderWeather(c, p, f, w, id); break;
-            case "weather2": renderWeatherSmall(c, p, f, w, id); break;
-            case "calendar3":
-                renderCalendarWide(c, p, f, d, mo, y, wd, week, Lu, w); dayColors(p, kind);
-                if (Lunar.suKien(d, mo, Lu) != null) { if (Lunar.ngayLe(d, mo, Lu) != null) p.red(R.id.d_l3); else p.gold(R.id.d_l3); }
-                break;
             case "compact":
                 clock(p, f);
                 v.setTextViewText(R.id.date, THU_NGAN[wd] + ", " + two(d) + "/" + two(mo) + (f.week ? " · W" + week : ""));
@@ -423,53 +400,6 @@ public final class WidgetRenderer {
             {R.id.h3, R.id.h3_time, R.id.h3_icon, R.id.h3_temp, R.id.h3_pop},
             {R.id.h4, R.id.h4_time, R.id.h4_icon, R.id.h4_temp, R.id.h4_pop}};
 
-    private static void renderWeather(Context c, Painter p, Cfg f, JSONObject w, int widgetId) {
-        RemoteViews v = p.v;
-        refreshButton(c, p, widgetId, "weather");
-        p.fg(R.id.wx_place); p.fg2(R.id.wx_updated); p.fg(R.id.wx_temp); p.fg(R.id.wx_desc); p.fg2(R.id.wx_hilo);
-        p.chip(R.id.rain_bg, R.id.rain, 1);
-        v.setTextViewText(R.id.wx_updated, updatedText(c));
-        CharSequence place = placeLabel(Weather.place(c), true);
-        v.setTextViewText(R.id.wx_place, f.place ? (place.length() == 0 ? "Vị trí hiện tại" : place) : "");
-        if (w == null) {
-            v.setTextViewText(R.id.wx_temp, "--°");
-            v.setTextViewText(R.id.wx_desc, "Chưa có dữ liệu");
-            v.setTextViewText(R.id.wx_hilo, "Mở app để lấy vị trí");
-            v.setViewVisibility(R.id.hourly, View.INVISIBLE);
-            v.setViewVisibility(R.id.rain_box, View.GONE);
-            return;
-        }
-        try {
-            JSONObject cur = w.getJSONObject("current"), dl = w.getJSONObject("daily"), h = w.getJSONObject("hourly");
-            int code = cur.optInt("weather_code", 3);
-            v.setImageViewResource(R.id.wx_icon, Weather.iconRes(code, cur.optInt("is_day", 1) == 1));
-            v.setTextViewText(R.id.wx_temp, Math.round(cur.optDouble("temperature_2m", 0)) + "°");
-            v.setTextViewText(R.id.wx_desc, Weather.desc(code) + " · ẩm " + cur.optInt("relative_humidity_2m", 0) + "%");
-            v.setTextViewText(R.id.wx_hilo, "Cảm giác " + Math.round(cur.optDouble("apparent_temperature", 0)) + "° · "
-                    + Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0)) + "°/"
-                    + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0)) + "°");
-            v.setViewVisibility(R.id.hourly, View.VISIBLE);
-            JSONArray ht = h.getJSONArray("time");
-            int i0 = Weather.currentHourIndex(w);
-            for (int k = 0; k < 5; k++) {
-                int i = i0 + 1 + k * 2;
-                int[] ids = H_IDS[k];
-                if (i >= ht.length()) { v.setViewVisibility(ids[0], View.INVISIBLE); continue; }
-                v.setViewVisibility(ids[0], View.VISIBLE);
-                v.setTextViewText(ids[1], Weather.hourOf(ht.getString(i)) + "h");
-                v.setImageViewResource(ids[2], Weather.iconRes(h.getJSONArray("weather_code").optInt(i, 3), h.getJSONArray("is_day").optInt(i, 1) == 1));
-                v.setTextViewText(ids[3], Math.round(h.getJSONArray("temperature_2m").optDouble(i, 0)) + "°");
-                double pop = h.getJSONArray("precipitation_probability").optDouble(i, Double.NaN);
-                double mm = h.getJSONArray("precipitation").optDouble(i, 0);
-                v.setTextViewText(ids[4], !Double.isNaN(pop) ? Math.round(pop) + "%" : (mm >= 0.1 ? String.format(Locale.US, "%.1fmm", mm) : ""));
-                p.fg2(ids[1]); p.fg(ids[3]); p.rain(ids[4]);
-            }
-            String hint = Weather.rainHint(w);
-            v.setViewVisibility(R.id.rain_box, f.weather && !hint.isEmpty() ? View.VISIBLE : View.GONE);
-            v.setTextViewText(R.id.rain, hint);
-        } catch (Exception ignored) {}
-    }
-
     private static void renderDate(Context c, Painter p, Cfg f, int d, int mo, int y, int wd, int week, Lunar.Date Lu) {
         RemoteViews v = p.v;
         v.setTextViewText(R.id.d_weekday, THU[wd]);
@@ -495,107 +425,6 @@ public final class WidgetRenderer {
         if (ct >= 0) { if (g.diem >= 4) p.col(R.id.d_l3, "setTextColor", p.L.acc, p.D.acc); else if (g.diem <= 2) p.red(R.id.d_l3); else p.fg(R.id.d_l3); }
         else p.fg(R.id.d_l3);
         p.fg2(R.id.d_l4);
-    }
-
-    private static void renderCalendar(Painter p, Cfg f, int d, int mo, int y, int wd, int week, Lunar.Date Lu, JSONObject w) {
-        RemoteViews v = p.v;
-        v.setTextViewText(R.id.d_weekday, THU[wd]);
-        if (wd == 0) p.red(R.id.d_weekday); else p.fg(R.id.d_weekday);
-        v.setViewVisibility(R.id.week_box, f.week ? View.VISIBLE : View.GONE);
-        v.setTextViewText(R.id.week, "W" + week);
-        p.chip(R.id.week_bg, R.id.week, 1);
-        v.setTextViewText(R.id.d_day, String.valueOf(d));
-        p.acc(R.id.d_day);
-        v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
-        p.fg2(R.id.d_month);
-        v.setViewVisibility(R.id.lchip_box, f.lunar ? View.VISIBLE : View.GONE);
-        v.setTextViewText(R.id.lchip, "ÂL " + lunarDM(Lu));
-        p.chip(R.id.lchip_bg, R.id.lchip, 0);
-        boolean show = f.weather && w != null;
-        v.setViewVisibility(R.id.weather_box, show ? View.VISIBLE : View.GONE);
-        if (show) {
-            try {
-                JSONObject cur = w.getJSONObject("current");
-                v.setImageViewResource(R.id.wx_icon, Weather.iconRes(cur.optInt("weather_code", 3), cur.optInt("is_day", 1) == 1));
-                v.setTextViewText(R.id.wx_temp, Math.round(cur.optDouble("temperature_2m", 0)) + "°");
-                p.fg(R.id.wx_temp);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private static void renderWeatherSmall(Context c, Painter p, Cfg f, JSONObject w, int widgetId) {
-        RemoteViews v = p.v;
-        refreshButton(c, p, widgetId, "weather2");
-        p.fg(R.id.wx_place); p.fg2(R.id.wx_updated); p.fg(R.id.wx_temp); p.fg(R.id.wx_desc); p.fg2(R.id.wx_hilo);
-        p.chip(R.id.rain_bg, R.id.rain, 1);
-        CharSequence place = placeLabel(Weather.place(c), false);
-        v.setTextViewText(R.id.wx_place, f.place ? (place.length() == 0 ? "Vị trí hiện tại" : place) : "Thời tiết");
-        String up = updatedText(c);
-        v.setTextViewText(R.id.wx_updated, up.isEmpty() || refreshing ? up : "Cập nhật " + up);
-        if (w == null) {
-            v.setTextViewText(R.id.wx_temp, "--°");
-            v.setTextViewText(R.id.wx_desc, "Chưa có dữ liệu");
-            v.setTextViewText(R.id.wx_hilo, "Mở app để lấy vị trí");
-            v.setViewVisibility(R.id.rain_box, View.GONE);
-            return;
-        }
-        try {
-            JSONObject cur = w.getJSONObject("current"), dl = w.getJSONObject("daily");
-            int code = cur.optInt("weather_code", 3);
-            v.setImageViewResource(R.id.wx_icon, Weather.iconRes(code, cur.optInt("is_day", 1) == 1));
-            v.setTextViewText(R.id.wx_temp, Math.round(cur.optDouble("temperature_2m", 0)) + "°");
-            v.setTextViewText(R.id.wx_desc, Weather.desc(code) + " · CG " + Math.round(cur.optDouble("apparent_temperature", 0)) + "°");
-            v.setTextViewText(R.id.wx_hilo, Math.round(dl.getJSONArray("temperature_2m_max").optDouble(0, 0)) + "°/"
-                    + Math.round(dl.getJSONArray("temperature_2m_min").optDouble(0, 0)) + "° · ẩm " + cur.optInt("relative_humidity_2m", 0) + "%");
-            String hint = Weather.rainHintShort(w);
-            v.setViewVisibility(R.id.rain_box, f.weather && !hint.isEmpty() ? View.VISIBLE : View.GONE);
-            v.setTextViewText(R.id.rain, hint);
-        } catch (Exception ignored) {}
-    }
-
-    private static void renderCalendarWide(Context c, Painter p, Cfg f, int d, int mo, int y, int wd, int week, Lunar.Date Lu, JSONObject w) {
-        RemoteViews v = p.v;
-        v.setTextViewText(R.id.d_weekday, THU[wd]);
-        if (wd == 0) p.red(R.id.d_weekday); else p.fg(R.id.d_weekday);
-        v.setTextViewText(R.id.d_day, String.valueOf(d));
-        p.acc(R.id.d_day);
-        v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);
-        p.fg2(R.id.d_month);
-        v.setViewVisibility(R.id.week_box, f.week ? View.VISIBLE : View.GONE);
-        v.setTextViewText(R.id.week, "W" + week);
-        p.chip(R.id.week_bg, R.id.week, 1);
-        v.setTextViewText(R.id.lchip, "ÂL " + lunarDM(Lu));
-        p.chip(R.id.lchip_bg, R.id.lchip, 0);
-        v.setTextViewText(R.id.d_l1, "Ngày " + Lunar.canChiDay(Lu.jd));
-        p.fg(R.id.d_l1);
-        v.setTextViewText(R.id.d_l2, "Tháng " + Lunar.canChiMonth(Lu.month, Lu.year));
-        p.fg2(R.id.d_l2);
-        v.setTextViewText(R.id.d_l6, "Năm " + Lunar.canChiYear(Lu.year));
-        p.fg2(R.id.d_l6);
-        String ev = Lunar.suKien(d, mo, Lu);
-        v.setTextViewText(R.id.d_l3, ev != null ? ev : "Tiết " + Lunar.tietKhi(Lu.jd));
-        if (ev != null) p.red(R.id.d_l3); else p.fg2(R.id.d_l3);
-        int ct = f.tuoi ? chiTuoi(c) : -1;
-        Lunar.DanhGia g = Lunar.danhGia(d, mo, y, ct);
-        if (ct >= 0) {
-            v.setTextViewText(R.id.d_l4, "Tuổi " + Lunar.CHI[ct] + ": " + g.muc);
-            if (g.diem >= 4) p.acc(R.id.d_l4); else if (g.diem <= 2) p.red(R.id.d_l4); else p.fg(R.id.d_l4);
-        } else {
-            v.setTextViewText(R.id.d_l4, (g.hoangDao ? "Hoàng đạo" : "Hắc đạo") + " · " + g.than);
-            p.fg(R.id.d_l4);
-        }
-        v.setTextViewText(R.id.d_l5, "Giờ tốt: " + Lunar.gioTot(Lu.jd, ct, 3));
-        p.fg2(R.id.d_l5);
-        boolean show = f.weather && w != null;
-        v.setViewVisibility(R.id.weather_box, show ? View.VISIBLE : View.GONE);
-        if (show) {
-            try {
-                JSONObject cur = w.getJSONObject("current");
-                v.setImageViewResource(R.id.wx_icon, Weather.iconRes(cur.optInt("weather_code", 3), cur.optInt("is_day", 1) == 1));
-                v.setTextViewText(R.id.wx_temp, Math.round(cur.optDouble("temperature_2m", 0)) + "°");
-                p.fg(R.id.wx_temp);
-            } catch (Exception ignored) {}
-        }
     }
 
     /* ---------------- Hẹn giờ ---------------- */

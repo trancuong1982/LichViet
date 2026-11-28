@@ -155,7 +155,7 @@ public final class Summary {
             v.setTextViewText(R.id.wx_hilo, "Mở app để lấy vị trí");
             v.setViewVisibility(R.id.rain_box, View.GONE);
         }
-        Intent r = new Intent(c, q ? SummaryQuoteWidget.class : SummaryWidget.class).setAction(BaseWidget.ACTION_REFRESH);
+        Intent r = new Intent(c, SummaryQuoteWidget.class).setAction(BaseWidget.ACTION_REFRESH);
         v.setOnClickPendingIntent(R.id.btn_refresh, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         v.setInt(R.id.rf_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
         v.setInt(R.id.rf_bg, "setImageAlpha", (!glass && !solid) ? 0 : (light ? 40 : 60));
