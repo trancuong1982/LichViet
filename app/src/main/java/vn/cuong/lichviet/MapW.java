@@ -40,12 +40,13 @@ public final class MapW {
     static synchronized MapData map(Context c) {
         if (MAP != null) return MAP;
         MapData m = new MapData();
-        try (InputStream in = c.getAssets().open("vnmap.json")) {
+        try (InputStream in = c.getAssets().open("vnmap.js")) {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
             byte[] buf = new byte[8192];
             int n;
             while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
-            JSONObject j = new JSONObject(bo.toString("UTF-8"));
+            String txt = bo.toString("UTF-8");                       // "window.VNMAP={...};" (dùng chung với trang xem trước)
+            JSONObject j = new JSONObject(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
             m.W = (float) j.getDouble("W"); m.H = (float) j.getDouble("H");
             m.lon0 = (float) j.getDouble("LON0"); m.lat1 = (float) j.getDouble("LAT1");
             m.k = (float) j.getDouble("k"); m.sx = (float) j.getDouble("sx");

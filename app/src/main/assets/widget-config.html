@@ -69,7 +69,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     <div class="tg" id="tPlace">Tên địa điểm <input type="checkbox" id="place" aria-label="Địa điểm"></div>
     <div class="tg" id="tTuoi">Tốt xấu theo tuổi <input type="checkbox" id="tuoi" aria-label="Theo tuổi"></div>
   </div>
-  <div class="note">Nút ⟳ trên widget để cập nhật thời tiết ngay. Chu kỳ tự cập nhật chỉnh trong Cài đặt của app.</div>
+  <div class="note">Chạm vào phần thời tiết (hoặc nút ⟳ nếu có) trên widget để cập nhật ngay. Chu kỳ tự cập nhật chỉnh trong Cài đặt của app.</div>
 </main>
 <div class="bar2"><button class="cancel" id="btnCancel">Hủy</button><button class="save" id="btnSave">Lưu widget</button></div>
 
@@ -221,7 +221,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
       '<div style="display:flex;align-items:center;gap:3px"><span class="wi" style="width:34px;height:34px">' + (cur ? WX.icon(cur.weather_code, cur.is_day) : WX_ICONS.partly_day) + '</span><span style="font-size:30px;font-weight:600">' + (cur ? Math.round(cur.temperature_2m) : "--") + "°</span></div>" +
       '<div class="ell" style="font-size:11px;font-weight:600">' + (cur ? WX.desc(cur.weather_code) : "") + "</div>" +
       '<div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cur ? Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "° · ẩm " + cur.relative_humidity_2m + "%" : "") + "</div>" +
-      '<div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cfg.place && data && data.place ? placeLbl(data.place, false) : pad(now.getHours()) + ":" + pad(now.getMinutes())) + " ⟳</div>" +
+      '<div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cfg.place && data && data.place ? placeLbl(data.place, false) : pad(now.getHours()) + ":" + pad(now.getMinutes())) + "</div>" +
       '<div class="ell" style="font-size:10px;font-weight:700">' + (w ? WX.rainHint(w).replace("Có thể mưa trong giờ này", "Mưa giờ này").replace("Có thể mưa khoảng ", "Mưa ~").replace("Có dông khoảng ", "Dông ~").replace("Không mưa trong 12 giờ tới", "Không mưa 12h tới").replace("Đang mưa · tạnh khoảng ", "Đang mưa · tạnh ~").replace(" (", " · ").replace("%)", "%") : "") + "</div></div>" : "";
     $("content").innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><b style="font-size:13px">' + greet + '</b><b style="font-size:11px;letter-spacing:1px">T' + m + "/" + y + "</b></div>" +
       '<div style="display:flex;gap:6px;height:' + (Q ? 120 : 136) + 'px">' + wx + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">' + three +
@@ -327,7 +327,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
     var three = '<div style="position:relative;height:88px;width:100px"><div style="' + base + ";color:" + ex + ";text-shadow:" + st.join(",") + ',4px 10px 14px rgba(0,0,0,.35)">' + num + '</div><div style="' + base + ";text-shadow:none;background:linear-gradient(180deg," + face[0] + " 15%," + face[1] + ' 95%);-webkit-background-clip:text;background-clip:text;color:transparent">' + num + "</div></div>";
     var evs = (EVENTS || builtinEvents()).filter(function (e) { return new Date(e.y, e.m - 1, e.d) >= new Date(y, m - 1, d); }).slice(0, 3).map(function (e) {
       var c = e.kind === 0 ? P.acc : e.kind === 1 ? P.red : P.gold, today = e.y === y && e.m === m && e.d === d;
-      return '<div class="ell" style="font-size:10.5px;font-weight:700;line-height:15px"><span style="color:' + c + '">●</span> <span style="color:' + (e.kind === 0 ? P.fg : c) + '">' + e.title + '</span><span style="color:' + P.fg2 + ';font-weight:400">  · ' + (today ? "Hôm nay" : pad(e.d) + "/" + pad(e.m)) + "</span></div>"; }).join("");
+      return '<div class="ell" style="font-size:10.5px;line-height:17px"><span style="color:' + c + '">●</span> <b>' + (today ? "Hôm nay" : pad(e.d) + "/" + pad(e.m)) + '</b><span style="color:' + P.fg2 + '">  ·  </span><span style="color:' + (e.kind === 0 ? P.fg : c) + ';font-weight:' + (e.kind === 0 ? 400 : 700) + '">' + e.title + "</span></div>"; }).join("");
     var t = birth && cfg.tuoi ? Lunar.tuoi.apply(null, birth.split("-").map(Number).reverse()) : null, tu = "";
     if (t) { var g = Lunar.danhGia(d, m, y, t.chi), mc = g.diem >= 4 ? P.good : g.diem === 3 ? P.mid : P.red;
       tu = '<div style="font-size:10.5px;font-weight:700;white-space:nowrap"><span style="color:' + mc + '">●</span> <span style="color:' + P.fg2 + ';font-weight:400">Tuổi ' + t.canChi.split(" ")[1] + ' ·</span> <span style="color:' + mc + '">' + (g.diem === 3 ? "Bình thường" : g.muc) + "</span></div>"; }

@@ -107,9 +107,9 @@ public final class CalendarEvents {
             int y = k.get(Calendar.YEAR), m = k.get(Calendar.MONTH) + 1, d = k.get(Calendar.DAY_OF_MONTH);
             Lunar.Date L = Lunar.fromSolar(d, m, y);
             String le = Lunar.ngayLe(d, m, L);
-            if (le != null && !holidayDays.contains(key(y, m, d))) out.add(make(k, le + (Lunar.LE_DUONG.containsKey(d + "/" + m) ? "" : " (ÂL)"), HOLIDAY));
+            if (le != null && !holidayDays.contains(key(y, m, d))) out.add(make(k, le, HOLIDAY));
             else if (le == null && (L.day == 1 || L.day == 15))
-                out.add(make(k, (L.day == 1 ? "Mùng 1 tháng " : "Rằm tháng ") + Lunar.THANG[L.month] + " (ÂL)", LUNAR));
+                out.add(make(k, (L.day == 1 ? "Mùng 1 tháng " : "Rằm tháng ") + L.month + " ÂL", LUNAR));
             k.add(Calendar.DAY_OF_MONTH, 1);
         }
         Collections.sort(out);

@@ -156,10 +156,7 @@ public final class Summary {
             v.setViewVisibility(R.id.rain_box, View.GONE);
         }
         Intent r = new Intent(c, SummaryQuoteWidget.class).setAction(BaseWidget.ACTION_REFRESH);
-        v.setOnClickPendingIntent(R.id.btn_refresh, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-        v.setInt(R.id.rf_bg, "setColorFilter", light ? 0xFF2D4BA0 : 0xFFFFFFFF);
-        v.setInt(R.id.rf_bg, "setImageAlpha", (!glass && !solid) ? 0 : (light ? 40 : 60));
-        v.setInt(R.id.rf_icon, "setColorFilter", p.fg);
+        v.setOnClickPendingIntent(R.id.wx_col, PendingIntent.getBroadcast(c, 1000 + id, r, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
         // ----- Cột ngày 3D -----
         v.setTextViewText(R.id.d_month, "T" + mo + "/" + y);

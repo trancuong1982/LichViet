@@ -140,15 +140,17 @@ public final class ArtW {
             if (n >= 3) break;
             int col = e.kind == CalendarEvents.PERSONAL ? (light ? p.acc : 0xFF8FC2FF) : e.kind == CalendarEvents.HOLIDAY ? p.red : p.gold;
             boolean today = e.d == d && e.m == mo && e.y == y;
-            String when = today ? "Hôm nay" : WidgetRenderer.two(e.d) + "/" + WidgetRenderer.two(e.m) + (e.y != y ? "/" + e.y : "");
+            String date = today ? "Hôm nay" : WidgetRenderer.two(e.d) + "/" + WidgetRenderer.two(e.m);
+            String title = e.title;
             if (!e.allDay && e.kind == CalendarEvents.PERSONAL) {
                 Calendar t = Calendar.getInstance(); t.setTimeInMillis(e.start);
-                when += " " + WidgetRenderer.two(t.get(Calendar.HOUR_OF_DAY)) + ":" + WidgetRenderer.two(t.get(Calendar.MINUTE));
+                title = WidgetRenderer.two(t.get(Calendar.HOUR_OF_DAY)) + ":" + WidgetRenderer.two(t.get(Calendar.MINUTE)) + " " + title;
             }
             SpannableStringBuilder sb = new SpannableStringBuilder();
             Summary.append(sb, "● ", col, true);
-            Summary.append(sb, e.title, e.kind == CalendarEvents.PERSONAL ? p.fg : col, true);
-            Summary.append(sb, "  · " + when, p.fg2, false);
+            Summary.append(sb, date, p.fg, true);
+            Summary.append(sb, "  ·  ", p.fg2, false);
+            Summary.append(sb, title, e.kind == CalendarEvents.PERSONAL ? p.fg : col, e.kind != CalendarEvents.PERSONAL);
             v.setViewVisibility(evIds[n], View.VISIBLE);
             v.setTextViewText(evIds[n], sb);
             n++;
