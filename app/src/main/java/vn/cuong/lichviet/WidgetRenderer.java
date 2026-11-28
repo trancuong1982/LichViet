@@ -26,7 +26,7 @@ public final class WidgetRenderer {
 
     @SuppressWarnings("unchecked")
     static final Class<? extends BaseWidget>[] PROVIDERS = new Class[]{
-            ClockWidget.class, DateWidget.class, CompactWidget.class, SummaryQuoteWidget.class, MapWidget.class};
+            ClockWidget.class, DateWidget.class, CompactWidget.class, SummaryQuoteWidget.class, MapWidget.class, ArtWidget.class};
 
     /** Đang tải thời tiết (để hiện "Đang cập nhật…" trên widget). */
     static volatile boolean refreshing = false;
@@ -161,6 +161,7 @@ public final class WidgetRenderer {
         if (cls == DateWidget.class) return "date";
         if (cls == SummaryQuoteWidget.class) return "summaryq";
         if (cls == MapWidget.class) return "map";
+        if (cls == ArtWidget.class) return "art";
         return "clock";
     }
     public static Class<? extends BaseWidget> classOf(String type) {
@@ -169,6 +170,7 @@ public final class WidgetRenderer {
             case "date": return DateWidget.class;
             case "summaryq": return SummaryQuoteWidget.class;
             case "map": return MapWidget.class;
+            case "art": return ArtWidget.class;
             default: return ClockWidget.class;
         }
     }
@@ -193,6 +195,7 @@ public final class WidgetRenderer {
         Cfg f = Cfg.load(c, id);
         if ("summaryq".equals(type)) { Summary.render(c, m, id, f, true); return; }
         if ("map".equals(type)) { MapW.render(c, m, id, f); return; }
+        if ("art".equals(type)) { ArtW.render(c, m, id, f); return; }
         RemoteViews v = new RemoteViews(c.getPackageName(), layoutOf(type));
         boolean auto = "auto".equals(f.theme);
         boolean useDark = "dark".equals(f.theme) || (auto && isNight(c));

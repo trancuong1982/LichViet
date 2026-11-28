@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent">
+  <ImageView android:id="@+id/bg" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/widget_bg" android:scaleType="fitXY" />
+  <ImageView android:id="@+id/gloss" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" />
+  <ImageView android:id="@+id/rim" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/glass_rim" android:scaleType="fitXY" />
+  <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:paddingStart="14dp" android:paddingEnd="14dp" android:paddingTop="10dp" android:paddingBottom="10dp">
+
+    <!-- Tầng 1: icon thời tiết như thật | châm ngôn + số ngày 3D cao -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+      <ImageView android:id="@+id/wx_icon" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:layout_marginStart="-6dp" android:scaleType="fitStart" android:adjustViewBounds="false" android:src="@drawable/wxr_partly" />
+      <LinearLayout android:layout_width="0dp" android:layout_weight="1.25" android:layout_height="match_parent" android:orientation="vertical" android:gravity="end">
+        <LinearLayout android:id="@+id/quote_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="end">
+          <TextView android:id="@+id/quote" android:layout_width="match_parent" android:layout_height="30dp" android:gravity="end|top" android:textSize="10sp" android:textStyle="bold|italic" android:textColor="#FFFFFF" android:maxLines="2" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7.5sp" android:autoSizeMaxTextSize="10sp" android:autoSizeStepGranularity="0.5sp" android:lineSpacingMultiplier="0.95" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" />
+        </LinearLayout>
+        <ImageView android:id="@+id/big3d" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scaleType="fitEnd" />
+      </LinearLayout>
+    </LinearLayout>
+
+    <!-- Tầng 2: nhiệt độ, mô tả, vị trí | thứ, tháng năm, âm lịch -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp">
+      <LinearLayout android:id="@+id/wx_col" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="bottom">
+          <TextView android:id="@+id/wx_temp" android:layout_width="wrap_content" android:layout_height="36dp" android:textSize="28sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="18sp" android:autoSizeMaxTextSize="28sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:fontFamily="sans-serif-medium"/>
+          <TextView android:id="@+id/wx_desc" android:layout_width="0dp" android:layout_weight="1" android:layout_height="19dp" android:textSize="11.5sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="8sp" android:autoSizeMaxTextSize="11.5sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold" android:layout_marginStart="6dp" android:layout_marginBottom="4dp"/>
+        </LinearLayout>
+        <TextView android:id="@+id/wx_hilo" android:layout_width="match_parent" android:layout_height="16dp" android:textSize="10sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="10sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" />
+        <TextView android:id="@+id/place" android:layout_width="match_parent" android:layout_height="18dp" android:textSize="11sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="8sp" android:autoSizeMaxTextSize="11sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold"/>
+      </LinearLayout>
+      <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="end">
+        <TextView android:id="@+id/d_weekday" android:layout_width="match_parent" android:layout_height="24dp" android:textSize="15sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="15sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold" android:gravity="end" android:letterSpacing="0.04"/>
+        <TextView android:id="@+id/d_month" android:layout_width="match_parent" android:layout_height="19dp" android:textSize="12sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="8sp" android:autoSizeMaxTextSize="12sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:gravity="end"/>
+        <TextView android:id="@+id/d_lunar" android:layout_width="match_parent" android:layout_height="17dp" android:textSize="10.5sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="8sp" android:autoSizeMaxTextSize="10.5sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:gravity="end"/>
+      </LinearLayout>
+    </LinearLayout>
+
+    <!-- Tầng 3: lịch sắp tới | tuổi + đồng hồ kim lồng số -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp" android:gravity="bottom">
+      <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+        <TextView android:id="@+id/ev0" android:layout_width="match_parent" android:layout_height="17dp" android:textSize="10.5sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="10.5sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold"/>
+        <TextView android:id="@+id/ev1" android:layout_width="match_parent" android:layout_height="17dp" android:textSize="10.5sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="10.5sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold"/>
+        <TextView android:id="@+id/ev2" android:layout_width="match_parent" android:layout_height="17dp" android:textSize="10.5sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="10.5sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold"/>
+      </LinearLayout>
+      <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="end" android:layout_marginStart="8dp">
+        <TextView android:id="@+id/tuoi" android:layout_width="wrap_content" android:layout_height="17dp" android:textSize="10.5sp" android:textColor="#FFFFFF" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="8sp" android:autoSizeMaxTextSize="10.5sp" android:autoSizeStepGranularity="0.5sp" android:includeFontPadding="true" android:shadowColor="#40000000" android:shadowRadius="2" android:shadowDy="1" android:textStyle="bold" android:gravity="end"/>
+        <FrameLayout android:layout_width="104dp" android:layout_height="44dp">
+          <TextClock android:id="@+id/clock" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:format24Hour="HH:mm" android:format12Hour="h:mm" android:textSize="30sp" android:fontFamily="sans-serif-light" android:letterSpacing="0.06" android:textColor="#FFFFFF" android:includeFontPadding="false" android:singleLine="true" />
+          <AnalogClock android:id="@+id/aclock" android:layout_width="44dp" android:layout_height="44dp" android:layout_gravity="center" android:dial="@drawable/art_dial" android:hand_hour="@drawable/art_hand_hour" android:hand_minute="@drawable/art_hand_minute" />
+          <TextView android:id="@+id/ampm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end|bottom" android:textSize="9sp" android:textStyle="bold" android:textColor="#FFFFFF" android:includeFontPadding="false" />
+        </FrameLayout>
+      </LinearLayout>
+    </LinearLayout>
+  </LinearLayout>
+</FrameLayout>

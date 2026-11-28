@@ -77,6 +77,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
 <script src="wx.js"></script>
 <script src="lunar.js"></script>
 <script src="vnmap.js"></script>
+<script src="wxreal.js"></script>
 <script>
 (function () {
   var $ = function (i) { return document.getElementById(i); };
@@ -87,7 +88,7 @@ input[type=range]{width:100%;accent-color:var(--tile)}
   var DARK = false; try { DARK = B.isDark(); } catch (e) {}
   document.body.classList.toggle("dark", DARK);
   var TYPE = B.getType();
-  var NAMES = { summary: "Tổng hợp 5×3", summaryq: "Tổng hợp + Châm ngôn 5×3", clock: "Đồng hồ & Lịch", date: "Ngày · Tuần · Âm lịch", weather: "Thời tiết", weather2: "Thời tiết 2×2", calendar: "Lịch ngày", calendar3: "Lịch ngày 3×2", compact: "Thanh gọn", map: "Bản đồ Việt Nam 5×3" };
+  var NAMES = { summary: "Tổng hợp 5×3", summaryq: "Tổng hợp + Châm ngôn 5×3", clock: "Đồng hồ & Lịch", date: "Ngày · Tuần · Âm lịch", weather: "Thời tiết", weather2: "Thời tiết 2×2", calendar: "Lịch ngày", calendar3: "Lịch ngày 3×2", compact: "Thanh gọn", map: "Bản đồ Việt Nam 5×3", art: "Nghệ thuật 5×3" };
   var THU = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], THU_N = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
   var THANG = ["", "Giêng", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "Tám", "Chín", "Mười", "Một", "Chạp"];
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -98,15 +99,15 @@ input[type=range]{width:100%;accent-color:var(--tile)}
 
   $("title").textContent = "Widget " + NAMES[TYPE];
   var hide = function (id) { $(id).classList.add("hide"); };
-  if (TYPE !== "clock" && TYPE !== "compact" && TYPE !== "map") hide("secClock");
-  if (TYPE === "map") { hide("bold"); hide("date"); }
+  if (TYPE !== "clock" && TYPE !== "compact" && TYPE !== "map" && TYPE !== "art") hide("secClock");
+  if (TYPE === "map" || TYPE === "art") { hide("bold"); hide("date"); }
   if (TYPE === "compact") { hide("date"); }
   if (TYPE === "weather" || TYPE === "weather2") { hide("tLunar"); hide("tWeek"); }
   if (TYPE === "date") { hide("tWeather"); hide("tPlace"); hide("tLunar"); }
   if (TYPE === "calendar" || TYPE === "calendar3" || TYPE === "compact") hide("tPlace");
   if (TYPE === "calendar3") hide("tLunar");
-  if (TYPE !== "date" && TYPE !== "calendar3" && TYPE !== "summary" && TYPE !== "summaryq" && TYPE !== "map") hide("tTuoi");
-  var SUM = TYPE === "summary" || TYPE === "summaryq" || TYPE === "map";
+  if (TYPE !== "date" && TYPE !== "calendar3" && TYPE !== "summary" && TYPE !== "summaryq" && TYPE !== "map" && TYPE !== "art") hide("tTuoi");
+  var SUM = TYPE === "summary" || TYPE === "summaryq" || TYPE === "map" || TYPE === "art";
   if (SUM) { hide("secBg"); hide("tLunar"); hide("tWeek"); $("secSum").classList.remove("hide"); }
 
   var ACC = { blue: ["#2D4BA0", "#B9C8FF"], green: ["#1F7A5C", "#7FD8B0"], orange: ["#C2620E", "#F4A65A"], purple: ["#6B4FBB", "#CDBDFF"], system: ["#3E5F90", "#A8C8FF"] };
@@ -306,8 +307,46 @@ input[type=range]{width:100%;accent-color:var(--tile)}
         '<div style="width:86px;flex:none;min-width:0"><div class="ell" style="font-size:11px;font-weight:700">' + (cur ? WX.desc(cur.weather_code) : "Chưa có dữ liệu") + '</div><div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cur ? Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "° · ẩm " + cur.relative_humidity_2m + "%" : "") +
         '</div><div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + hint + '</div></div><div style="flex:1;display:flex">' + fc + "</div></div>" : "") + "</div>";
   }
+  function realIcon(code, day) {
+    var R = window.WXREAL || {}, k = code === 0 ? (day ? "sun" : "moon") : (code === 1 || code === 2) ? (day ? "partly" : "partly_night") : code >= 95 ? "thunder" : code >= 51 ? "rain" : "cloud";
+    return R[k] || "";
+  }
+  function renderArt() {
+    var light = cfg.tone === "light" || (cfg.tone === "auto" && WALL_LIGHT), glass = cfg.style === "glass", solid = cfg.style === "solid";
+    var P = light ? { fg: "#16203A", fg2: "rgba(22,32,58,.68)", red: "#E0322A", gold: "#B8760A", good: "#1F7A5C", mid: "#8A6400", acc: "#2D4BA0" }
+      : { fg: "#fff", fg2: "rgba(255,255,255,.86)", red: "#FF7A6E", gold: "#FFC94D", good: "#A6F2CF", mid: "#FFE29A", acc: "#8FC2FF" };
+    var wg = $("wg"); wg.style.maxWidth = "340px"; wg.className = "wg" + (light ? "" : " wall"); wg.style.color = P.fg;
+    $("bgl").style.opacity = solid ? cfg.opacity / 100 : 1;
+    $("bgl").style.background = solid ? (light ? "#F6F8FD" : "#1C212B") : glass ? (light ? "linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.40) 45%,rgba(255,255,255,.54))" : "linear-gradient(135deg,rgba(14,20,40,.46),rgba(14,20,40,.30) 50%,rgba(14,20,40,.42))") : "transparent";
+    wg.style.boxShadow = glass ? "inset 0 0 0 1px " + (light ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.38)") : "none";
+    var L = Lunar.solar2Lunar(d, m, y), kind = dayKind(d, m, wd, L), kc = kind === 1 ? P.red : kind === 2 ? P.gold : P.fg;
+    var face = kind === 1 ? ["#FFE9E5", "#FF4D3D"] : kind === 2 ? ["#FFF6D6", "#FFB020"] : light ? ["#3A4566", "#0E1426"] : ["#FFFFFF", "#E4ECFF"];
+    var ex = kind === 1 ? "#B3261E" : kind === 2 ? "#B36B00" : light ? "#8C97B8" : "#3F6BE8", num = pad(d), st = [];
+    for (var i = 1; i <= 6; i++) st.push((i * .6).toFixed(1) + "px " + (i * .9).toFixed(1) + "px 0 " + ex);
+    var base = "position:absolute;right:0;top:-12px;font-size:108px;font-weight:900;line-height:108px;letter-spacing:-2px;transform:scaleX(.62);transform-origin:right top;white-space:nowrap";
+    var three = '<div style="position:relative;height:88px;width:100px"><div style="' + base + ";color:" + ex + ";text-shadow:" + st.join(",") + ',4px 10px 14px rgba(0,0,0,.35)">' + num + '</div><div style="' + base + ";text-shadow:none;background:linear-gradient(180deg," + face[0] + " 15%," + face[1] + ' 95%);-webkit-background-clip:text;background-clip:text;color:transparent">' + num + "</div></div>";
+    var evs = (EVENTS || builtinEvents()).filter(function (e) { return new Date(e.y, e.m - 1, e.d) >= new Date(y, m - 1, d); }).slice(0, 3).map(function (e) {
+      var c = e.kind === 0 ? P.acc : e.kind === 1 ? P.red : P.gold, today = e.y === y && e.m === m && e.d === d;
+      return '<div class="ell" style="font-size:10.5px;font-weight:700;line-height:15px"><span style="color:' + c + '">●</span> <span style="color:' + (e.kind === 0 ? P.fg : c) + '">' + e.title + '</span><span style="color:' + P.fg2 + ';font-weight:400">  · ' + (today ? "Hôm nay" : pad(e.d) + "/" + pad(e.m)) + "</span></div>"; }).join("");
+    var t = birth && cfg.tuoi ? Lunar.tuoi.apply(null, birth.split("-").map(Number).reverse()) : null, tu = "";
+    if (t) { var g = Lunar.danhGia(d, m, y, t.chi), mc = g.diem >= 4 ? P.good : g.diem === 3 ? P.mid : P.red;
+      tu = '<div style="font-size:10.5px;font-weight:700;white-space:nowrap"><span style="color:' + mc + '">●</span> <span style="color:' + P.fg2 + ';font-weight:400">Tuổi ' + t.canChi.split(" ")[1] + ' ·</span> <span style="color:' + mc + '">' + (g.diem === 3 ? "Bình thường" : g.muc) + "</span></div>"; }
+    var w = data && data.w, cur = w && w.current, pl = data && data.place ? data.place : "";
+    var hr = now.getHours(), mi = now.getMinutes(), ha = (hr % 12 + mi / 60) * 30 * Math.PI / 180, ma = mi * 6 * Math.PI / 180, hand = function (a, l, sw, col, tail) { return '<line x1="' + (52 - tail * Math.sin(a)) + '" y1="' + (22 + tail * Math.cos(a)) + '" x2="' + (52 + l * Math.sin(a)) + '" y2="' + (22 - l * Math.cos(a)) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-linecap="round"/>'; };
+    var clk = '<svg width="104" height="44" viewBox="0 0 104 44"><text x="52" y="32" font-size="30" font-weight="300" letter-spacing="2" text-anchor="middle" fill="' + P.fg + '" fill-opacity=".55">' + (cfg.h24 ? pad(hr) : ((hr % 12) || 12)) + ":" + pad(mi) + "</text>" +
+      hand(ha, 15, 3.4, "#E0A020", 3.5) + hand(ma, 21, 1.6, light ? "#16203A" : "#fff", 6) + '<circle cx="52" cy="22" r="2.6" fill="#E0A020"/>' + (cfg.h24 ? "" : '<text x="103" y="42" font-size="9" font-weight="800" text-anchor="end" fill="' + P.fg2 + '">' + (hr < 12 ? "AM" : "PM") + "</text>") + "</svg>";
+    $("content").innerHTML = '<div style="display:flex;flex-direction:column;height:240px;gap:4px">' +
+      '<div style="flex:1;display:flex;min-height:0"><div style="flex:1;margin-left:-6px;' + (cfg.weather ? "" : "visibility:hidden") + '">' + (cur ? realIcon(cur.weather_code, cur.is_day) : realIcon(2, 1)) + "</div>" +
+      '<div style="flex:1.25;display:flex;flex-direction:column;align-items:flex-end;min-width:0"><div style="font-size:10px;font-weight:600;font-style:italic;line-height:1.3;text-align:right;color:' + P.fg2 + ';height:28px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">“' + QUOTE + "</div>" + three + "</div></div>" +
+      '<div style="display:flex"><div style="flex:1;min-width:0;' + (cfg.weather ? "" : "visibility:hidden") + '"><div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:28px;font-weight:600;line-height:1">' + (cur ? Math.round(cur.temperature_2m) : "--") + '°</span><b class="ell" style="font-size:11.5px">' + (cur ? WX.desc(cur.weather_code) : "Chưa có dữ liệu") + "</b></div>" +
+      '<div class="ell" style="font-size:10px;color:' + P.fg2 + '">' + (cur ? Math.round(w.daily.temperature_2m_max[0]) + "°/" + Math.round(w.daily.temperature_2m_min[0]) + "° · ẩm " + cur.relative_humidity_2m + "%" : "") + "</div>" +
+      (cfg.place && pl ? '<div class="ell" style="font-size:11px;font-weight:700"><span style="color:#FF8A00">●</span> ' + shortPlace(pl) + '<span style="font-weight:400;color:' + P.fg2 + '">' + (provOf(pl) && provOf(pl) !== shortPlace(pl) ? " · " + provOf(pl) : "") + "</span></div>" : "") + "</div>" +
+      '<div style="flex:1;text-align:right;min-width:0"><div style="font-size:15px;font-weight:900;letter-spacing:.6px;color:' + kc + '">' + THU[wd].toUpperCase() + '</div><div style="font-size:12px"><b>Tháng ' + m + "</b> " + y + '</div><div style="font-size:10.5px;color:' + P.fg2 + '">ÂL ' + L.day + "/" + L.month + " · " + Lunar.canChiYear(L.year) + "</div></div></div>" +
+      '<div style="display:flex;align-items:flex-end"><div style="flex:1;min-width:0">' + evs + '</div><div style="display:flex;flex-direction:column;align-items:flex-end;margin-left:8px">' + tu + clk + "</div></div></div>";
+  }
   function render() {
     if (TYPE === "map") { renderMap(); return; }
+    if (TYPE === "art") { renderArt(); return; }
     if (TYPE === "summary" || TYPE === "summaryq") { renderSummary(); return; }
     $("wg").style.boxShadow = "none";
     var p = pal(), L = Lunar.solar2Lunar(d, m, y), wk = Lunar.isoWeek(d, m, y), w = data && data.w, cur = w && w.current;

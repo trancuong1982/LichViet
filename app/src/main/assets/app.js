@@ -312,7 +312,8 @@
     
     { id: "compact", name: "Thanh gọn", size: "4×1" },
     { id: "summaryq", name: "Tổng hợp + Châm ngôn", size: "5×3" },
-    { id: "map", name: "Bản đồ Việt Nam", size: "5×3" }
+    { id: "map", name: "Bản đồ Việt Nam", size: "5×3" },
+    { id: "art", name: "Nghệ thuật", size: "5×3" }
   ];
   function renderBirthInfo() {
     var t = tuoiInfo();

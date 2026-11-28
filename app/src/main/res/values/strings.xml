@@ -10,4 +10,6 @@
     <string name="wdesc_summaryq">Như widget tổng hợp, thêm câu châm ngôn đổi mỗi ngày</string>
     <string name="wname_map">Bản đồ Việt Nam 5×3</string>
     <string name="wdesc_map">Ngày 3D có nhắc nhở, thời tiết trong ngày, bản đồ VN định vị GPS</string>
+    <string name="wname_art">Nghệ thuật 5×3</string>
+    <string name="wdesc_art">Số ngày 3D cao, icon thời tiết như thật, châm ngôn, lịch sắp tới, đồng hồ kim</string>
 </resources>

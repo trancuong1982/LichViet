@@ -10,8 +10,8 @@ android {
         applicationId "vn.cuong.lichviet"
         minSdk 26
         targetSdk 34
-        versionCode 17
-        versionName "2.14"
+        versionCode 18
+        versionName "2.15"
     }
 
     // Khóa ký cố định để các bản cập nhật cài đè lên nhau được (không phải gỡ app)

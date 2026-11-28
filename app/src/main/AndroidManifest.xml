@@ -58,6 +58,13 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_map" />
         </receiver>
 
+        <receiver android:name=".ArtWidget" android:exported="true" android:label="@string/wname_art">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_art" />
+        </receiver>
+
         <receiver android:name=".UpdateReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />
